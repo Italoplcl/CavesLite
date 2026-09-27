@@ -20,7 +20,7 @@ import java.util.Locale;
 
 /** /dcaves [list|summon|kill|reload] */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
-    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "kill", "reload");
+    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "kill", "kills", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
@@ -54,7 +54,18 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
             case "summon", "spawn" -> summon(sender, label, args);
 
-            default -> Text.send(sender, "&7Usage: &f/" + label + " <list|summon <mob> [x y z [world]]|kill [mob]|reload>");
+            case "kills" -> {
+                Player target = args.length >= 2 ? Bukkit.getPlayer(args[1])
+                        : sender instanceof Player player ? player : null;
+                if (target == null) {
+                    Text.send(sender, "&cSpecify an online player: &f/" + label + " kills <player>");
+                } else {
+                    Text.send(sender, "&7" + target.getName() + "&7's custom mob kills: &e"
+                            + plugin.getAchievements().getKills(target));
+                }
+            }
+
+            default -> Text.send(sender, "&7Usage: &f/" + label + " <list|summon <mob> [x y z [world]]|kill [mob]|kills [player]|reload>");
         }
         return true;
     }

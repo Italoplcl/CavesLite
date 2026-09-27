@@ -113,6 +113,167 @@ tension:
   volume: 1
   pitch: 1
 
+# Shows a boss bar naming whichever enabled mob is closest to each player.
+boss-bar:
+  enabled: true
+  worlds:
+    - world
+  # How far away (in blocks) a mob has to be to show up in the bar
+  radius: 24
+  # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
+  format: "&4{mob} &7cerca..."
+  # "distance" -> bar fills up the closer the mob gets.
+  # "health" -> bar shows the mob's remaining health instead.
+  progress: distance
+  # RED, BLUE, GREEN, PINK, PURPLE, WHITE, YELLOW
+  color: RED
+  # PROGRESS (solid bar), or NOTCHED_6 / NOTCHED_10 / NOTCHED_12 / NOTCHED_20 (segmented)
+  style: PROGRESS
+  # Which mobs show up in the bar. false = never shown for that mob.
+  mobs:
+    alpha-spider: true
+    cave-golem: true
+    crying-bat: false
+    dead-miner: true
+    hexed-armor: true
+    hungering-darkness: true
+    lava-creeper: true
+    magma-monster: true
+    mimic: true
+    smoke-demon: true
+    tnt-creeper: true
+    watcher: true
+
+# Dramatic title/subtitle flash to nearby players when an enabled mob spawns.
+spawn-titles:
+  enabled: true
+  radius: 20
+  # How far apart (in ticks) a single player can be shown a title again, so a
+  # burst of spawns doesn't spam their screen.
+  cooldown-ticks: 100
+  fade-in-ticks: 10
+  stay-ticks: 40
+  fade-out-ticks: 10
+  title: "&4\u00a1Cuidado!"
+  # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
+  subtitle: "&7{mob} ha aparecido cerca"
+  mobs:
+    alpha-spider: true
+    cave-golem: true
+    crying-bat: false
+    dead-miner: true
+    hexed-armor: true
+    hungering-darkness: true
+    lava-creeper: true
+    magma-monster: true
+    mimic: true
+    smoke-demon: true
+    tnt-creeper: true
+    watcher: true
+
+# Short Action Bar message shown while an enabled mob is close to a player.
+warnings:
+  enabled: true
+  radius: 10
+  message: "&7Sientes que algo te observa..."
+  mobs:
+    alpha-spider: false
+    cave-golem: false
+    crying-bat: false
+    dead-miner: false
+    hexed-armor: true
+    hungering-darkness: true
+    lava-creeper: false
+    magma-monster: false
+    mimic: true
+    smoke-demon: true
+    tnt-creeper: false
+    watcher: true
+
+# Faint particle trail left behind specific mobs. Disabled per-mob by default;
+# turn on the ones you want.
+trails:
+  enabled: true
+  # How far from a player a mob still gets its trail rendered
+  radius: 32
+  mobs:
+    watcher:
+      enabled: true
+      particle: SOUL
+      count: 2
+      offset: 0.25
+    smoke-demon:
+      enabled: true
+      particle: SMOKE
+      count: 2
+      offset: 0.3
+    hungering-darkness:
+      enabled: false
+      particle: SQUID_INK
+      count: 1
+      offset: 0.2
+
+# Plugin-side "achievements": counts kills of ANY enabled custom mob per
+# player and celebrates when a threshold is reached. This is NOT a vanilla
+# Minecraft advancement (no toast in the Advancements menu, no F key entry) -
+# that would require a datapack shipped alongside the plugin.
+achievements:
+  enabled: true
+  broadcast: true
+  sound: minecraft:ui.toast.challenge_complete
+  # Money rewards, paid through Vault - works with whatever economy plugin
+  # is behind it (CMI, EssentialsX, or anything else Vault-compatible).
+  # If Vault (or an economy plugin) isn't installed, this is silently skipped.
+  economy:
+    enabled: true
+    # Paid on every custom mob kill, on top of any threshold reward below
+    per-kill: 3
+  # kills: label shown in the title/chat, plus its own money reward (0 = none)
+  thresholds:
+    5:
+      label: "&6Cazador Novato"
+      reward: 25
+    15:
+      label: "&6Cazador de las Profundidades"
+      reward: 75
+    30:
+      label: "&4Terror de las Cuevas"
+      reward: 150
+    50:
+      label: "&4Leyenda de las Cavernas"
+      reward: 300
+
+# "Who's killed the most custom mobs" leaderboards, for PlaceholderAPI
+# (%dangerouscaves_top_kills_1_name%, etc. - see CavesPlaceholders.java for
+# the full list). A kill always updates the count immediately, but the
+# sorted ranking and its own save file (leaderboards.yml) only refresh
+# periodically - see "update-interval-ticks" - so this never saves to disk
+# on every single kill.
+leaderboards:
+  enabled: true
+  update-interval-ticks: 100
+  # How many ranks are kept/available. Placeholders past this return empty.
+  top-size: 10
+  # Leaderboard combining kills of every custom mob together
+  total: true
+  # Per-mob leaderboards: off by default. Each one you enable here means the
+  # plugin tracks (and stores) that mob's kills separately per player - if
+  # you only care about the ranking for one or two mobs, only turn those on;
+  # leaving the rest off keeps this feature lighter.
+  mobs:
+    alpha-spider: false
+    cave-golem: false
+    crying-bat: false
+    dead-miner: false
+    hexed-armor: false
+    hungering-darkness: false
+    lava-creeper: false
+    magma-monster: false
+    mimic: false
+    smoke-demon: false
+    tnt-creeper: false
+    watcher: false
+
 mobs:
   enabled: true
 

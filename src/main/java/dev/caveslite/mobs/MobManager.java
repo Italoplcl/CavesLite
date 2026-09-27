@@ -36,8 +36,14 @@ import java.util.function.Consumer;
 
 /** Registers custom mobs, replaces natural spawns with them and ticks the ones that need it. */
 public final class MobManager implements Listener {
+    /** Notified right after a custom mob is actually spawned into the world. */
+    public interface SpawnListener {
+        void onSpawn(CustomMob mob, LivingEntity entity);
+    }
+
     private final Plugin plugin;
     private final Map<String, CustomMob> mobs = new LinkedHashMap<>();
+    private final List<SpawnListener> spawnListeners = new java.util.ArrayList<>();
     private final Map<CustomMob.Ticking, Set<UUID>> tracked = new HashMap<>();
     private final WorldFilter worlds = new WorldFilter();
 
@@ -104,12 +110,19 @@ public final class MobManager implements Listener {
         return mob == null ? null : spawn(mob, loc);
     }
 
+    public void addSpawnListener(SpawnListener listener) {
+        spawnListeners.add(listener);
+    }
+
     public LivingEntity spawn(CustomMob mob, Location loc) {
         LivingEntity entity = mob.spawn(loc);
         if (mob instanceof CustomMob.Ticking ticking) {
             tracked.get(ticking).add(entity.getUniqueId());
         }
         entity.setRemoveWhenFarAway(true);
+        for (SpawnListener listener : spawnListeners) {
+            listener.onSpawn(mob, entity);
+        }
         return entity;
     }
 

@@ -25,6 +25,14 @@ PlaceholderAPI, WorldGuard/GriefPrevention/Lands y bStats.
   compatible con su API) y **Java 25**.
 - No es compatible con Folia.
 
+## Compilar
+
+**Opcion facil (GitHub):** sube esta carpeta a un repositorio tuyo. La pestana *Actions*
+compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log del paso
+`gradle build` muestra el error exacto.
+
+**Local:** instala JDK 25 y Gradle 9.1+ y ejecuta `gradle build`. El jar queda en `build/libs/`.
+
 ## Instalar
 
 1. Borra `Dangerous-Caves-2_2_13.jar` de `plugins/` (este plugin usa el mismo nombre interno
