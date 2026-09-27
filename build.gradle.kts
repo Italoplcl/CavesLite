@@ -18,8 +18,17 @@ dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:26.3.build.+")
     // Both are optional at runtime (see plugin.yml softdepend) - only used
     // if the server actually has Vault and/or PlaceholderAPI installed.
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    // VaultAPI's own pom.xml pulls in a 2018-era Bukkit jar as a normal
+    // dependency, which Gradle treats as competing with Purpur's API for
+    // the same "org.bukkit:bukkit" capability and refuses to resolve -
+    // excluded here since Purpur's API already provides everything VaultAPI
+    // needs to compile against.
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+        exclude(group = "org.bukkit", module = "bukkit")
+    }
+    compileOnly("me.clip:placeholderapi:2.11.6") {
+        exclude(group = "org.spigotmc", module = "spigot-api")
+    }
 }
 
 java {
