@@ -1,5 +1,6 @@
 package dev.caveslite;
 
+import dev.caveslite.lang.Lang;
 import dev.caveslite.mobs.MobManager;
 import dev.caveslite.util.TagHelper;
 import dev.caveslite.util.Text;
@@ -17,28 +18,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-/** /dcaves [list|summon|kill|reload] */
+/** /dcaves [list|summon|kill|kills|reload] */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
     private static final List<String> SUBCOMMANDS = List.of("list", "summon", "kill", "kills", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
+    private final Lang lang;
 
-    public CavesCommand(CavesLite plugin, MobManager mobs) {
+    public CavesCommand(CavesLite plugin, MobManager mobs, Lang lang) {
         this.plugin = plugin;
         this.mobs = mobs;
+        this.lang = lang;
+    }
+
+    private void send(CommandSender sender, String key, Map<String, String> placeholders) {
+        Text.send(sender, lang.get(key, placeholders));
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
-            case "list" -> Text.send(sender, "&7Custom mobs: &f" + String.join(", ", mobs.getMobIds()));
+            case "list" -> send(sender, "command.list", Map.of("mobs", String.join(", ", mobs.getMobIds())));
 
             case "reload", "r" -> {
                 plugin.reloadAll();
-                Text.send(sender, "&aConfig reloaded.");
+                send(sender, "command.reload", null);
             }
 
             case "kill" -> {
@@ -49,7 +57,7 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
                     String type = args[1].toLowerCase(Locale.ROOT);
                     removed = mobs.killAll(entity -> TagHelper.isTagged(entity, type));
                 }
-                Text.send(sender, "&aRemoved &e" + removed + "&a custom mob(s).");
+                send(sender, "command.kill-removed", Map.of("amount", String.valueOf(removed)));
             }
 
             case "summon", "spawn" -> summon(sender, label, args);
@@ -58,36 +66,40 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
                 Player target = args.length >= 2 ? Bukkit.getPlayer(args[1])
                         : sender instanceof Player player ? player : null;
                 if (target == null) {
-                    Text.send(sender, "&cSpecify an online player: &f/" + label + " kills <player>");
+                    send(sender, "command.kills-specify-player", Map.of("label", label));
                 } else {
-                    Text.send(sender, "&7" + target.getName() + "&7's custom mob kills: &e"
-                            + plugin.getAchievements().getKills(target));
+                    send(sender, "command.kills-result", Map.of(
+                            "player", target.getName(),
+                            "amount", String.valueOf(plugin.getAchievements().getKills(target))
+                    ));
                 }
             }
 
-            default -> Text.send(sender, "&7Usage: &f/" + label + " <list|summon <mob> [x y z [world]]|kill [mob]|kills [player]|reload>");
+            default -> send(sender, "command.usage", Map.of("label", label));
         }
         return true;
     }
 
     private void summon(CommandSender sender, String label, String[] args) {
         if (args.length < 2) {
-            Text.send(sender, "&cSpecify a mob: &f/" + label + " summon <mob>");
+            send(sender, "command.summon-specify-mob", Map.of("label", label));
             return;
         }
         String type = args[1].toLowerCase(Locale.ROOT);
         if (mobs.getMob(type) == null) {
-            Text.send(sender, "&cUnknown mob &e" + type + "&c. Available: &f" + String.join(", ", mobs.getMobIds()));
+            send(sender, "command.summon-unknown-mob", Map.of(
+                    "mob", type, "mobs", String.join(", ", mobs.getMobIds())
+            ));
             return;
         }
 
         Location loc = locationFrom(sender, Arrays.copyOfRange(args, 2, args.length));
         if (loc == null) {
-            Text.send(sender, "&cGive coordinates: &f/" + label + " summon " + type + " <x> <y> <z> [world]");
+            send(sender, "command.summon-specify-coords", Map.of("label", label, "mob", type));
             return;
         }
         mobs.spawn(type, loc);
-        Text.send(sender, "&aSummoned &e" + type + "&a.");
+        send(sender, "command.summon-success", Map.of("mob", type));
     }
 
     /** No arguments -> the player's own position; otherwise "x y z [world]". */

@@ -1,5 +1,7 @@
 package dev.caveslite;
 
+import dev.caveslite.herobrine.HerobrineEncounter;
+import dev.caveslite.lang.Lang;
 import dev.caveslite.mobs.MobManager;
 import dev.caveslite.mobs.defaults.AlphaSpider;
 import dev.caveslite.mobs.defaults.CaveGolem;
@@ -42,7 +44,12 @@ public final class CavesLite extends JavaPlugin implements Listener {
     private static final long TRAILS_TICK = 6L;
     /** Ticks between leaderboard re-sort + save checks (only does work if something changed). */
     private static final long LEADERBOARD_TICK = 100L;
+    /** Ticks between Herobrine spawn-roll checks (its own cooldown/chance config decides how often it actually appears). */
+    private static final long HEROBRINE_SPAWN_TICK = 100L;
+    /** Ticks between Herobrine observation/vanish/combat checks - short, for responsive "am I being watched" behaviour. */
+    private static final long HEROBRINE_TICK = 4L;
 
+    private Lang lang;
     private MobManager mobs;
     private AmbientSounds ambient;
     private Footsteps footsteps;
@@ -54,10 +61,13 @@ public final class CavesLite extends JavaPlugin implements Listener {
     private VaultEconomy economy;
     private MobAchievements achievements;
     private KillLeaderboard leaderboard;
+    private HerobrineEncounter herobrine;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+
+        lang = new Lang(this);
 
         mobs = new MobManager(this);
         mobs.register(new Mimic(mobs));
@@ -83,6 +93,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         economy = new VaultEconomy(this);
         achievements = new MobAchievements(this, economy);
         leaderboard = new KillLeaderboard(this);
+        herobrine = new HerobrineEncounter(this, lang);
 
         mobs.addSpawnListener(spawnTitles);
 
@@ -96,6 +107,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(achievements, this);
         getServer().getPluginManager().registerEvents(leaderboard, this);
+        getServer().getPluginManager().registerEvents(herobrine, this);
         reloadAll();
 
         getServer().getScheduler().runTaskTimer(this, mobs::tick, MOB_TICK, MOB_TICK);
@@ -106,18 +118,21 @@ public final class CavesLite extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskTimer(this, warnings::tick, WARNINGS_TICK, WARNINGS_TICK);
         getServer().getScheduler().runTaskTimer(this, trails::tick, TRAILS_TICK, TRAILS_TICK);
         getServer().getScheduler().runTaskTimer(this, leaderboard::tick, LEADERBOARD_TICK, LEADERBOARD_TICK);
+        getServer().getScheduler().runTaskTimer(this, herobrine::trySpawns, HEROBRINE_SPAWN_TICK, HEROBRINE_SPAWN_TICK);
+        getServer().getScheduler().runTaskTimer(this, herobrine::tick, HEROBRINE_TICK, HEROBRINE_TICK);
 
         PluginCommand command = getCommand("dangerouscaves");
         if (command != null) {
-            command.setExecutor(new CavesCommand(this, mobs));
+            command.setExecutor(new CavesCommand(this, mobs, lang));
         }
     }
 
     /** Re-reads config.yml and applies it. */
     public void reloadAll() {
         reloadConfig();
-        // The old plugin kept ambient sounds under "caverns.ambient"; this one accepts both layouts.
         var config = getConfig();
+        lang.reload(config.getString("language", "es"));
+        // The old plugin kept ambient sounds under "caverns.ambient"; this one accepts both layouts.
         var ambientSection = config.isConfigurationSection("caverns.ambient")
                 ? Utils.section(config, "caverns.ambient")
                 : Utils.section(config, "ambient");
@@ -131,6 +146,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         economy.hook();
         achievements.reload(Utils.section(config, "achievements"));
         leaderboard.reload(Utils.section(config, "leaderboards"));
+        herobrine.reload(Utils.section(config, "herobrine"));
         mobs.reload(Utils.section(config, "mobs"));
     }
 
@@ -138,6 +154,9 @@ public final class CavesLite extends JavaPlugin implements Listener {
     public void onDisable() {
         if (leaderboard != null) {
             leaderboard.flush();
+        }
+        if (herobrine != null) {
+            herobrine.removeAll();
         }
     }
 

@@ -1,0 +1,21 @@
+# Archivo de idioma - español. Puedes editar cualquier texto de aquí sin
+# tocar el plugin; usa {placeholder} donde corresponda. Los códigos de
+# color (&a, &4, etc.) funcionan igual que en config.yml.
+
+command:
+  list: "&7Mobs personalizados: &f{mobs}"
+  reload: "&aConfiguración recargada."
+  kill-removed: "&aSe eliminaron &e{amount}&a mob(s) personalizado(s)."
+  usage: "&7Uso: &f/{label} <list|summon <mob> [x y z [mundo]]|kill [mob]|kills [jugador]|reload>"
+  kills-specify-player: "&cIndica un jugador conectado: &f/{label} kills <jugador>"
+  kills-result: "&7Muertes de mobs personalizados de {player}&7: &e{amount}"
+  summon-specify-mob: "&cIndica un mob: &f/{label} summon <mob>"
+  summon-unknown-mob: "&cMob desconocido &e{mob}&c. Disponibles: &f{mobs}"
+  summon-specify-coords: "&cIndica coordenadas: &f/{label} summon {mob} <x> <y> <z> [mundo]"
+  summon-success: "&aInvocado &e{mob}&a."
+
+herobrine:
+  # Mensaje extremadamente raro que a veces aparece en el chat. Sin explicación.
+  stop-message: "&8Stop."
+  # Nombre mostrado en la bossbar, solo durante el combate.
+  bossbar-name: "&4&lHEROBRINE"
