@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
@@ -79,7 +80,7 @@ public final class HerobrineEncounter implements Listener {
 
     private static final NamespacedKey MARKER = new NamespacedKey("dangerouscaves", "herobrine-marker");
     private static final Set<Material> PROTECTED_NEARBY = EnumSet.of(
-            Material.VAULT, Material.TRIAL_SPAWNER, Material.OMINOUS_ITEM_SPAWNER,
+            Material.VAULT, Material.TRIAL_SPAWNER,
             Material.SCULK_CATALYST, Material.REINFORCED_DEEPSLATE
     );
 
@@ -150,7 +151,12 @@ public final class HerobrineEncounter implements Listener {
         biomes = new ArrayList<>();
         for (String name : cfg.getStringList("biomes")) {
             try {
-                biomes.add(Biome.valueOf(name.trim().toUpperCase(Locale.ROOT)));
+                Biome biome = Registry.BIOME.get(NamespacedKey.minecraft(name.trim().toLowerCase(Locale.ROOT)));
+                if (biome != null) {
+                    biomes.add(biome);
+                } else {
+                    plugin.getLogger().log(Level.WARNING, "Unknown herobrine biome: {0}", name);
+                }
             } catch (IllegalArgumentException e) {
                 plugin.getLogger().log(Level.WARNING, "Unknown herobrine biome: {0}", name);
             }
