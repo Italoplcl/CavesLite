@@ -594,14 +594,22 @@ herobrine:
   combat:
     enabled: true
     # Si no muere antes de esto, escapa y termina el combate
-    max-duration-seconds: 60
+    max-duration-seconds: 35
     # Bajo esta fracción de vida, empieza a huir
-    flee-health-fraction: 0.35
+    flee-health-fraction: 0.20
+    # Al agotarse el combate o bajar de vida, corre visiblemente antes de desaparecer.
+    flee-duration-seconds: 4
+    flee-step-blocks: 1.05
+    # Movimiento y ataque controlados por el plugin (Mannequin no usa IA hostil).
+    chase-step-blocks: 0.55
+    attack-cooldown-ticks: 24
+    knockback: 1.15
     # Nivel de Speed mientras huye
     flee-speed-amplifier: 2
-  health: 40
-  damage: 6
-  speed: 0.25
+  health: 80
+  # Poco daño directo: el golpe destaca principalmente por el empuje.
+  damage: 2
+  speed: 0.35
   max-chase-distance: 20
   reward:
     xp: 30

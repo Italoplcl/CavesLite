@@ -93,7 +93,9 @@ public final class HerobrineEncounter implements Listener {
             java.util.concurrent.atomic.AtomicReference<BossBar> bossBar,
             UUID targetPlayerId,
             java.util.concurrent.atomic.AtomicBoolean spotted,
-            java.util.concurrent.atomic.AtomicBoolean sneakyStrikeDone
+            java.util.concurrent.atomic.AtomicBoolean sneakyStrikeDone,
+            java.util.concurrent.atomic.AtomicBoolean escaping,
+            java.util.concurrent.atomic.AtomicLong escapeStartTick
     ) {}
 
     private final Plugin plugin;
@@ -130,6 +132,8 @@ public final class HerobrineEncounter implements Listener {
     private double fleeHealthFraction;
     private int fleeSpeedAmplifier;
     private double health, damage, speed, maxChaseDistance;
+    private double combatKnockback, combatStep, fleeStep;
+    private long combatAttackCooldownTicks, fleeDurationTicks;
     private double lurkingMinDistance, lurkingMaxDistance, lurkingLateral;
     private double stalkingMinDistance, stalkingMaxDistance, stalkingLateral;
     private double creepingMinDistance, creepingMaxDistance, creepingLateral;
@@ -247,8 +251,13 @@ public final class HerobrineEncounter implements Listener {
         fleeSpeedAmplifier = combat != null ? combat.getInt("flee-speed-amplifier", 2) : 2;
 
         health = Math.max(1, cfg.getDouble("health", 40));
-        damage = Math.max(0, cfg.getDouble("damage", 6));
-        speed = cfg.getDouble("speed", 0.25);
+        damage = Math.max(0, cfg.getDouble("damage", 2));
+        speed = cfg.getDouble("speed", 0.35);
+        combatKnockback = combat != null ? Math.max(0, combat.getDouble("knockback", 1.15)) : 1.15;
+        combatStep = combat != null ? Math.max(0.1, combat.getDouble("chase-step-blocks", 0.55)) : 0.55;
+        fleeStep = combat != null ? Math.max(0.2, combat.getDouble("flee-step-blocks", 1.05)) : 1.05;
+        combatAttackCooldownTicks = Math.max(8, combat != null ? combat.getLong("attack-cooldown-ticks", 24) : 24);
+        fleeDurationTicks = Math.max(20, combat != null ? combat.getLong("flee-duration-seconds", 4) : 4) * 20L;
         maxChaseDistance = cfg.getDouble("max-chase-distance", 20);
 
         ConfigurationSection reward = cfg.getConfigurationSection("reward");
@@ -286,7 +295,15 @@ public final class HerobrineEncounter implements Listener {
         EncounterType type = pickEncounterType(player);
         if (type == null) return false;
 
-        Location spot = isStalkingType(type) ? findStalkingSpot(player, type) : findSpot(player, type);
+        Location spot = findEncounterSpot(player, type);
+        if (spot == null && Locations.isCave(player.getLocation())) {
+            // In caves, never waste a due encounter merely because a long-range type had no corridor.
+            for (EncounterType fallback : List.of(EncounterType.STALKING, EncounterType.WATCHER, EncounterType.CREEPING)) {
+                if (!enabledEncounters.contains(fallback) || fallback == type) continue;
+                spot = findEncounterSpot(player, fallback);
+                if (spot != null) { type = fallback; break; }
+            }
+        }
         if (spot == null) return false;
 
         if (isNearProtectedStructure(spot) || isTooCloseToAnotherInstance(spot)) return false;
@@ -303,7 +320,9 @@ public final class HerobrineEncounter implements Listener {
                 new java.util.concurrent.atomic.AtomicReference<>(null),
                 player.getUniqueId(),
                 new java.util.concurrent.atomic.AtomicBoolean(false),
-                new java.util.concurrent.atomic.AtomicBoolean(false)
+                new java.util.concurrent.atomic.AtomicBoolean(false),
+                new java.util.concurrent.atomic.AtomicBoolean(false),
+                new java.util.concurrent.atomic.AtomicLong(0)
         );
         active.put(id, instance);
         playerCooldowns.put(player.getUniqueId(), now + cooldownTicks);
@@ -330,6 +349,36 @@ public final class HerobrineEncounter implements Listener {
 
     private boolean isStalkingType(EncounterType type) {
         return type == EncounterType.LURKING || type == EncounterType.STALKING || type == EncounterType.CREEPING;
+    }
+
+    private Location findEncounterSpot(Player player, EncounterType type) {
+        if (Locations.isCave(player.getLocation())) return findCaveSpot(player, type);
+        return isStalkingType(type) ? findStalkingSpot(player, type) : findSpot(player, type);
+    }
+
+    /** Cave-aware placement: searches the player's actual underground height instead of the surface. */
+    private Location findCaveSpot(Player player, EncounterType type) {
+        double min = (type == EncounterType.CREEPING ? 5 : type == EncounterType.WATCHER ? 7 : 10);
+        double max = (type == EncounterType.LURKING ? 30 : type == EncounterType.STALKING ? 24 : type == EncounterType.CREEPING ? 12 : 18);
+        Location base = player.getLocation();
+        World world = base.getWorld();
+        if (world == null) return null;
+        for (int attempt = 0; attempt < 48; attempt++) {
+            double distance = Rng.nextDouble(min, max);
+            double angle = Rng.nextDouble(0, Math.PI * 2);
+            Location column = base.clone().add(Math.cos(angle) * distance, 0, Math.sin(angle) * distance);
+            if (!world.isChunkLoaded(column.getBlockX() >> 4, column.getBlockZ() >> 4)) continue;
+            for (int dy = 6; dy >= -6; dy--) {
+                Location candidate = new Location(world, column.getX(), base.getBlockY() + dy, column.getZ());
+                Block feet = candidate.getBlock();
+                if (!isSafeSpawnColumn(feet, feet.getRelative(0, 1, 0), feet.getRelative(0, -1, 0))) continue;
+                candidate.add(0.5, 0, 0.5);
+                if (candidate.distanceSquared(base) < min * min) continue;
+                facePlayer(candidate, player);
+                return candidate;
+            }
+        }
+        return null;
     }
 
     /**
@@ -577,34 +626,39 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void tickCombat(LivingEntity entity, Active instance, long now) {
-        if (now - instance.combatStartTick().get() > combatMaxDurationTicks) {
-            endCombat(instance);
-            vanish(entity, instance);
-            return;
-        }
         Player target = Bukkit.getPlayer(instance.targetPlayerId());
         if (target == null || !target.isOnline() || !target.getWorld().equals(entity.getWorld())) {
-            endCombat(instance);
-            vanish(entity, instance);
+            endCombat(instance); vanish(entity, instance); return;
+        }
+
+        long elapsed = now - instance.combatStartTick().get();
+        double fraction = entity.getHealth() / Math.max(1, health);
+        if (!instance.escaping().get() && (elapsed >= combatMaxDurationTicks || fraction <= fleeHealthFraction)) {
+            instance.escaping().set(true);
+            instance.escapeStartTick().set(now);
+        }
+
+        if (instance.escaping().get()) {
+            // Herobrine does not blink out at timeout: he visibly bolts away first.
+            if ((now - instance.escapeStartTick().get()) >= fleeDurationTicks ||
+                    target.getLocation().distanceSquared(entity.getLocation()) > maxChaseDistance * maxChaseDistance * 2.25) {
+                endCombat(instance); vanish(entity, instance); return;
+            }
+            stepAwayFromTarget(entity, target, fleeStep);
             return;
         }
+
         double distanceSq = target.getLocation().distanceSquared(entity.getLocation());
         if (distanceSq > maxChaseDistance * maxChaseDistance) {
-            endCombat(instance);
-            vanish(entity, instance);
-            return;
+            instance.escaping().set(true); instance.escapeStartTick().set(now); return;
         }
-        double fraction = entity.getHealth() / Math.max(1, health);
-        if (fraction <= fleeHealthFraction) {
-            stepAwayFromTarget(entity, target, Math.max(0.45, speed * 2.0));
-            return;
-        }
-        // Mannequins have no hostile mob AI: DangerousCavesLite owns the chase.
-        if ((now - instance.combatStartTick().get()) % 4L == 0L) {
-            stepTowardTarget(entity, target, Math.max(0.25, speed * 1.6));
-        }
-        if (distanceSq <= 2.4 * 2.4 && (now - instance.combatStartTick().get()) % 20L < 4L) {
+
+        // Frequent short steps make the mannequin feel alive without mob pathfinding.
+        if (elapsed % 4L == 0L) stepTowardTarget(entity, target, combatStep);
+        if (distanceSq <= 2.5 * 2.5 && elapsed % combatAttackCooldownTicks < 4L) {
             target.damage(damage, entity);
+            org.bukkit.util.Vector push = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
+            if (push.lengthSquared() > 0.001) target.setVelocity(push.normalize().multiply(combatKnockback).setY(0.28));
         }
     }
 
@@ -745,6 +799,8 @@ public final class HerobrineEncounter implements Listener {
     private void startCombat(LivingEntity entity, Active instance, Player attacker) {
         instance.inCombat().set(true);
         instance.combatStartTick().set(firstWorldTime());
+        instance.escaping().set(false);
+        instance.escapeStartTick().set(0);
         entity.setInvulnerable(false);
         entity.setCustomNameVisible(false);
         if (entity instanceof Mannequin mannequin) mannequin.setImmovable(false);
@@ -809,14 +865,15 @@ public final class HerobrineEncounter implements Listener {
         try { type = requestedType == null ? EncounterType.STALKING : EncounterType.valueOf(requestedType.toUpperCase(Locale.ROOT)); }
         catch (IllegalArgumentException ex) { return false; }
         long now = firstWorldTime();
-        Location spot = isStalkingType(type) ? findStalkingSpot(target, type) : findSpot(target, type);
+        Location spot = findEncounterSpot(target, type);
         if (spot == null || isNearProtectedStructure(spot)) return false;
         LivingEntity entity = spawn(spot);
         Active instance = new Active(entity.getUniqueId(), type, now,
                 new java.util.concurrent.atomic.AtomicInteger(0), new java.util.concurrent.atomic.AtomicLong(0),
                 new java.util.concurrent.atomic.AtomicLong(0), new java.util.concurrent.atomic.AtomicBoolean(false),
                 new java.util.concurrent.atomic.AtomicLong(0), new java.util.concurrent.atomic.AtomicReference<>(null),
-                target.getUniqueId(), new java.util.concurrent.atomic.AtomicBoolean(false), new java.util.concurrent.atomic.AtomicBoolean(false));
+                target.getUniqueId(), new java.util.concurrent.atomic.AtomicBoolean(false), new java.util.concurrent.atomic.AtomicBoolean(false),
+                new java.util.concurrent.atomic.AtomicBoolean(false), new java.util.concurrent.atomic.AtomicLong(0));
         active.put(entity.getUniqueId(), instance);
         return true;
     }
