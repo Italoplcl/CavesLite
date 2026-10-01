@@ -312,3 +312,14 @@ Un ranking "por mob" solo tiene datos si ese mob está en `true` dentro de `lead
 - **Dangerous Caves 2** © imDaniX y Evil-Lootlye, licencia MIT — diseño original de los mobs y los sonidos ambientales, reescrito para la API actual.
 - **PaperMC/Paper** y **PurpurMC/Purpur** — API sobre la que corre el plugin.
 - **Vault** y **PlaceholderAPI** — puentes opcionales usados para economía y placeholders; ver `LICENSE` para el detalle de licencias.
+
+
+## Herobrine: sistema de acecho (1.7.1)
+
+Se agregaron tres encuentros inspirados en la mecánica de observación de From The Fog, implementados de forma nativa para Paper/Purpur:
+
+- **LURKING:** Herobrine aparece muy lejos (50-80 bloques por defecto), con desplazamiento lateral, y mira al jugador.
+- **STALKING:** aparece a distancia media (25-46 bloques) y mantiene la mirada sobre su objetivo.
+- **CREEPING:** aparece muy cerca (3-5 bloques), normalmente detrás del jugador. Puede ejecutar un único Sneaky Strike si no es descubierto.
+
+Los tres encuentros buscan suelo válido alrededor de la altura del jugador, no fuerzan la carga de chunks y desaparecen al superar `stalking.max-lifetime-seconds`. La detección requiere dirección de mirada y línea de visión real. Todas las distancias, duración y parámetros del Sneaky Strike se pueden ajustar en `herobrine.stalking` dentro de `config.yml`.

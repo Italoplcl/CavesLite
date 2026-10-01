@@ -526,6 +526,10 @@ herobrine:
     outside-observer: true
     # Solo puede salir si hay un Creaking cerca
     creaking: true
+    # Encuentros inspirados en el acecho clásico de Herobrine / From The Fog
+    lurking: true
+    stalking: true
+    creeping: true
   observation:
     # Si un jugador lo mira fijo más de esto, desaparece
     max-look-seconds: 8
@@ -533,6 +537,30 @@ herobrine:
     teleport-chance: 20
     # % de probabilidad, cuando nadie lo mira, de desaparecer del todo
     vanish-chance: 10
+  # Sistema de acecho. Las distancias siguen la idea de From The Fog, pero la
+  # implementación es nativa de Paper/Purpur y no depende del resource/datapack.
+  stalking:
+    max-lifetime-seconds: 30
+    lurking:
+      min-distance: 50
+      max-distance: 80
+      max-lateral: 50
+    stalking:
+      min-distance: 25
+      max-distance: 46
+      max-lateral: 35
+    creeping:
+      min-distance: 3
+      max-distance: 5
+      max-lateral: 3
+    sneaky-strike:
+      enabled: true
+      # Solo CREEPING. Si el jugador todavía no lo descubre tras el retraso,
+      # esta probabilidad decide si recibe un único golpe antes de desaparecer.
+      chance: 10
+      delay-seconds: 8
+      damage: 2
+      knockback: 0.7
   footsteps:
     sound: minecraft:entity.player.attack.weak
     volume: 0.6

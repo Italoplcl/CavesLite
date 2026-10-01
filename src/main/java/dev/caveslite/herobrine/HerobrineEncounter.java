@@ -76,7 +76,7 @@ import java.util.logging.Level;
  *   some bar, there's no way to render just a name with nothing else.
  */
 public final class HerobrineEncounter implements Listener {
-    private enum EncounterType { OBSERVE, FLEE_ON_SIGHT, BEHIND, FALSE_CHASE, OUTSIDE_OBSERVER, CREAKING }
+    private enum EncounterType { OBSERVE, FLEE_ON_SIGHT, BEHIND, FALSE_CHASE, OUTSIDE_OBSERVER, CREAKING, LURKING, STALKING, CREEPING }
 
     private static final NamespacedKey MARKER = new NamespacedKey("dangerouscaves", "herobrine-marker");
     private static final Set<Material> PROTECTED_NEARBY = EnumSet.of(
@@ -93,7 +93,10 @@ public final class HerobrineEncounter implements Listener {
             java.util.concurrent.atomic.AtomicLong lookStartTick,
             java.util.concurrent.atomic.AtomicBoolean inCombat,
             java.util.concurrent.atomic.AtomicLong combatStartTick,
-            java.util.concurrent.atomic.AtomicReference<BossBar> bossBar
+            java.util.concurrent.atomic.AtomicReference<BossBar> bossBar,
+            UUID targetPlayerId,
+            java.util.concurrent.atomic.AtomicBoolean spotted,
+            java.util.concurrent.atomic.AtomicBoolean sneakyStrikeDone
     ) {}
 
     private final Plugin plugin;
@@ -128,6 +131,13 @@ public final class HerobrineEncounter implements Listener {
     private double fleeHealthFraction;
     private int fleeSpeedAmplifier;
     private double health, damage, speed, maxChaseDistance;
+    private double lurkingMinDistance, lurkingMaxDistance, lurkingLateral;
+    private double stalkingMinDistance, stalkingMaxDistance, stalkingLateral;
+    private double creepingMinDistance, creepingMaxDistance, creepingLateral;
+    private long stalkingMaxLifetimeTicks;
+    private boolean sneakyStrikeEnabled;
+    private double sneakyStrikeChance, sneakyStrikeDamage, sneakyStrikeKnockback;
+    private long sneakyStrikeDelayTicks;
     private int rewardXp;
     private boolean rewardCommandEnabled;
     private String rewardCommand;
@@ -171,6 +181,9 @@ public final class HerobrineEncounter implements Listener {
             if (encountersCfg.getBoolean("false-chase", true)) enabledEncounters.add(EncounterType.FALSE_CHASE);
             if (encountersCfg.getBoolean("outside-observer", true)) enabledEncounters.add(EncounterType.OUTSIDE_OBSERVER);
             if (encountersCfg.getBoolean("creaking", true)) enabledEncounters.add(EncounterType.CREAKING);
+            if (encountersCfg.getBoolean("lurking", true)) enabledEncounters.add(EncounterType.LURKING);
+            if (encountersCfg.getBoolean("stalking", true)) enabledEncounters.add(EncounterType.STALKING);
+            if (encountersCfg.getBoolean("creeping", true)) enabledEncounters.add(EncounterType.CREEPING);
         }
         if (enabledEncounters.isEmpty()) enabledEncounters.add(EncounterType.OBSERVE);
 
@@ -178,6 +191,24 @@ public final class HerobrineEncounter implements Listener {
         maxLookSeconds = observation != null ? observation.getInt("max-look-seconds", 8) : 8;
         relocateChance = (observation != null ? observation.getDouble("teleport-chance", 20) : 20) / 100;
         vanishChance = (observation != null ? observation.getDouble("vanish-chance", 10) : 10) / 100;
+
+        ConfigurationSection stalking = cfg.getConfigurationSection("stalking");
+        lurkingMinDistance = stalking != null ? stalking.getDouble("lurking.min-distance", 50) : 50;
+        lurkingMaxDistance = stalking != null ? stalking.getDouble("lurking.max-distance", 80) : 80;
+        lurkingLateral = stalking != null ? stalking.getDouble("lurking.max-lateral", 50) : 50;
+        stalkingMinDistance = stalking != null ? stalking.getDouble("stalking.min-distance", 25) : 25;
+        stalkingMaxDistance = stalking != null ? stalking.getDouble("stalking.max-distance", 46) : 46;
+        stalkingLateral = stalking != null ? stalking.getDouble("stalking.max-lateral", 35) : 35;
+        creepingMinDistance = stalking != null ? stalking.getDouble("creeping.min-distance", 3) : 3;
+        creepingMaxDistance = stalking != null ? stalking.getDouble("creeping.max-distance", 5) : 5;
+        creepingLateral = stalking != null ? stalking.getDouble("creeping.max-lateral", 3) : 3;
+        stalkingMaxLifetimeTicks = Math.max(5, stalking != null ? stalking.getLong("max-lifetime-seconds", 30) : 30) * 20L;
+        ConfigurationSection strike = stalking != null ? stalking.getConfigurationSection("sneaky-strike") : null;
+        sneakyStrikeEnabled = strike == null || strike.getBoolean("enabled", true);
+        sneakyStrikeChance = (strike != null ? strike.getDouble("chance", 10) : 10) / 100;
+        sneakyStrikeDelayTicks = Math.max(1, strike != null ? strike.getLong("delay-seconds", 8) : 8) * 20L;
+        sneakyStrikeDamage = Math.max(0, strike != null ? strike.getDouble("damage", 2) : 2);
+        sneakyStrikeKnockback = Math.max(0, strike != null ? strike.getDouble("knockback", 0.7) : 0.7);
 
         ConfigurationSection footsteps = cfg.getConfigurationSection("footsteps");
         footstepSound = Sounds.find(footsteps != null ? footsteps.getString("sound", "minecraft:entity.player.attack.weak") : "minecraft:entity.player.attack.weak");
@@ -244,7 +275,7 @@ public final class HerobrineEncounter implements Listener {
         EncounterType type = pickEncounterType(player);
         if (type == null) return;
 
-        Location spot = findSpot(player, type);
+        Location spot = isStalkingType(type) ? findStalkingSpot(player, type) : findSpot(player, type);
         if (spot == null) return;
 
         if (isNearProtectedStructure(spot) || isTooCloseToAnotherInstance(spot)) return;
@@ -258,7 +289,10 @@ public final class HerobrineEncounter implements Listener {
                 new java.util.concurrent.atomic.AtomicLong(0),
                 new java.util.concurrent.atomic.AtomicBoolean(false),
                 new java.util.concurrent.atomic.AtomicLong(0),
-                new java.util.concurrent.atomic.AtomicReference<>(null)
+                new java.util.concurrent.atomic.AtomicReference<>(null),
+                player.getUniqueId(),
+                new java.util.concurrent.atomic.AtomicBoolean(false),
+                new java.util.concurrent.atomic.AtomicBoolean(false)
         );
         active.put(id, instance);
         playerCooldowns.put(player.getUniqueId(), now + cooldownTicks);
@@ -281,6 +315,61 @@ public final class HerobrineEncounter implements Listener {
         if (options.contains(EncounterType.OUTSIDE_OBSERVER) && inCave) options.remove(EncounterType.OUTSIDE_OBSERVER);
         if (options.isEmpty()) return null;
         return Rng.randomElement(options);
+    }
+
+    private boolean isStalkingType(EncounterType type) {
+        return type == EncounterType.LURKING || type == EncounterType.STALKING || type == EncounterType.CREEPING;
+    }
+
+    /**
+     * From-The-Fog-inspired placement: choose a point relative to the direction the player is facing,
+     * add a random lateral offset, then find nearby solid ground without force-loading chunks.
+     */
+    private Location findStalkingSpot(Player player, EncounterType type) {
+        double min, max, lateral;
+        boolean allowFront = type != EncounterType.CREEPING;
+        switch (type) {
+            case LURKING -> { min = lurkingMinDistance; max = lurkingMaxDistance; lateral = lurkingLateral; }
+            case STALKING -> { min = stalkingMinDistance; max = stalkingMaxDistance; lateral = stalkingLateral; }
+            case CREEPING -> { min = creepingMinDistance; max = creepingMaxDistance; lateral = creepingLateral; }
+            default -> { return findSpot(player, type); }
+        }
+
+        org.bukkit.util.Vector forward = player.getEyeLocation().getDirection().setY(0);
+        if (forward.lengthSquared() < 0.001) forward = new org.bukkit.util.Vector(0, 0, 1);
+        forward.normalize();
+        org.bukkit.util.Vector right = new org.bukkit.util.Vector(-forward.getZ(), 0, forward.getX());
+
+        for (int attempt = 0; attempt < 12; attempt++) {
+            double distance = Rng.nextDouble(min, Math.max(min + 0.01, max));
+            double side = Rng.nextDouble(-lateral, lateral);
+            double sign = (allowFront && Rng.chance(0.5)) ? 1.0 : -1.0;
+            org.bukkit.util.Vector offset = forward.clone().multiply(distance * sign).add(right.clone().multiply(side));
+            Location column = player.getLocation().clone().add(offset);
+            World world = column.getWorld();
+            if (world == null || !world.isChunkLoaded(column.getBlockX() >> 4, column.getBlockZ() >> 4)) continue;
+
+            int centerY = player.getLocation().getBlockY();
+            for (int dy = 8; dy >= -8; dy--) {
+                int y = centerY + dy;
+                if (y < yMin || y > yMax) continue;
+                Location candidate = new Location(world, column.getX(), y, column.getZ());
+                Block feet = candidate.getBlock();
+                Block headBlock = feet.getRelative(0, 1, 0);
+                Block floor = feet.getRelative(0, -1, 0);
+                if (feet.getType().isAir() && headBlock.getType().isAir() && floor.getType().isSolid()) {
+                    candidate.add(0.5, 0, 0.5);
+                    facePlayer(candidate, player);
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void facePlayer(Location from, Player player) {
+        org.bukkit.util.Vector direction = player.getEyeLocation().toVector().subtract(from.toVector());
+        if (direction.lengthSquared() > 0.001) from.setDirection(direction);
     }
 
     private Location findSpot(Player player, EncounterType type) {
@@ -384,10 +473,18 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void tickIdle(LivingEntity entity, Active instance, long now) {
-        Player watcher = nearestWatcher(entity);
+        Player target = Bukkit.getPlayer(instance.targetPlayerId());
+        if (target != null && target.isOnline() && target.getWorld().equals(entity.getWorld())) {
+            // A stalker never idles facing a random direction: keep the classic white eyes on its victim.
+            Location facing = entity.getLocation();
+            facePlayer(facing, target);
+            entity.teleport(facing);
+        }
 
+        Player watcher = nearestWatcher(entity);
         if (watcher != null) {
             entity.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+            instance.spotted().set(true);
             long lookStart = instance.lookStartTick().get();
             if (lookStart == 0) {
                 instance.lookStartTick().set(now);
@@ -397,12 +494,32 @@ public final class HerobrineEncounter implements Listener {
             }
         } else {
             instance.lookStartTick().set(0);
-            if (Rng.chance(vanishChance)) {
+            if (!isStalkingType(instance.type())) {
+                if (Rng.chance(vanishChance)) {
+                    vanish(entity, instance);
+                    return;
+                }
+                if (Rng.chance(relocateChance)) relocate(entity);
+            }
+        }
+
+        if (isStalkingType(instance.type())) {
+            if (now - instance.spawnTick() >= stalkingMaxLifetimeTicks) {
                 vanish(entity, instance);
                 return;
             }
-            if (Rng.chance(relocateChance)) {
-                relocate(entity);
+            // Creeping can punish a player who never notices the figure behind them. One strike, then vanish.
+            if (instance.type() == EncounterType.CREEPING && sneakyStrikeEnabled && !instance.spotted().get()
+                    && !instance.sneakyStrikeDone().get() && now - instance.spawnTick() >= sneakyStrikeDelayTicks) {
+                instance.sneakyStrikeDone().set(true);
+                if (target != null && target.isOnline() && target.getWorld().equals(entity.getWorld())
+                        && target.getLocation().distanceSquared(entity.getLocation()) <= 7 * 7 && Rng.chance(sneakyStrikeChance)) {
+                    if (sneakyStrikeDamage > 0) target.damage(sneakyStrikeDamage, entity);
+                    org.bukkit.util.Vector push = target.getLocation().toVector().subtract(entity.getLocation().toVector());
+                    if (push.lengthSquared() > 0.001) target.setVelocity(push.normalize().multiply(sneakyStrikeKnockback).setY(0.25));
+                    vanish(entity, instance);
+                    return;
+                }
             }
         }
 
@@ -423,12 +540,22 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private Player nearestWatcher(LivingEntity entity) {
-        for (Entity nearby : entity.getWorld().getNearbyEntities(entity.getLocation(), 20, 20, 20)) {
-            if (nearby instanceof Player player && Locations.isLookingAt(player, entity)) {
-                return player;
+        // LURKING can intentionally be much farther away than the old 20-block observer check.
+        // Iterating world players avoids a large nearby-entity cube scan and still keeps this cheap.
+        double maxDetection = Math.max(100.0, lurkingMaxDistance + lurkingLateral);
+        double maxDetectionSq = maxDetection * maxDetection;
+        Player nearest = null;
+        double best = Double.MAX_VALUE;
+        for (Player player : entity.getWorld().getPlayers()) {
+            double distanceSq = player.getLocation().distanceSquared(entity.getLocation());
+            if (distanceSq > maxDetectionSq) continue;
+            if (!Locations.isLookingAt(player, entity) || !player.hasLineOfSight(entity)) continue;
+            if (distanceSq < best) {
+                best = distanceSq;
+                nearest = player;
             }
         }
-        return null;
+        return nearest;
     }
 
     private void relocate(LivingEntity entity) {
