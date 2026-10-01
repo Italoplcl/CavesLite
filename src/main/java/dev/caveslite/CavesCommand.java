@@ -22,7 +22,7 @@ import java.util.Map;
 
 /** /dcaves [list|summon|kill|kills|reload] */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
-    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "kill", "kills", "reload");
+    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
@@ -62,6 +62,14 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
             case "summon", "spawn" -> summon(sender, label, args);
 
+            case "herobrine" -> {
+                if (args.length >= 2 && args[1].equalsIgnoreCase("debug")) {
+                    Player target = args.length >= 3 ? Bukkit.getPlayer(args[2]) : sender instanceof Player p ? p : null;
+                    if (target == null) Text.send(sender, "§cUsa /" + label + " herobrine debug <jugador>");
+                    else Text.send(sender, "§7" + plugin.getHerobrine().debug(target));
+                } else Text.send(sender, "§7Uso: /" + label + " herobrine debug [jugador]");
+            }
+
             case "kills" -> {
                 Player target = args.length >= 2 ? Bukkit.getPlayer(args[1])
                         : sender instanceof Player player ? player : null;
@@ -86,6 +94,29 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             return;
         }
         String type = args[1].toLowerCase(Locale.ROOT);
+        if (type.equals("herobrine")) {
+            Player target = sender instanceof Player p ? p : null;
+            String encounter = "stalking";
+            if (args.length >= 3) {
+                Player named = Bukkit.getPlayer(args[2]);
+                if (named != null) {
+                    target = named;
+                    if (args.length >= 4) encounter = args[3];
+                } else {
+                    encounter = args[2];
+                }
+            }
+            if (target == null) {
+                Text.send(sender, "§cUsa /" + label + " summon herobrine <jugador> [tipo]");
+                return;
+            }
+            if (!plugin.getHerobrine().summonFor(target, encounter)) {
+                Text.send(sender, "§cNo se pudo invocar a Herobrine. Revisa el tipo o no hay una posición segura cargada.");
+                return;
+            }
+            Text.send(sender, "§aHerobrine invocado cerca de §e" + target.getName() + "§a (" + encounter.toUpperCase(Locale.ROOT) + ").");
+            return;
+        }
         if (mobs.getMob(type) == null) {
             send(sender, "command.summon-unknown-mob", Map.of(
                     "mob", type, "mobs", String.join(", ", mobs.getMobIds())
@@ -127,6 +158,12 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             options.addAll(SUBCOMMANDS);
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("summon") || args[0].equalsIgnoreCase("kill"))) {
             options.addAll(mobs.getMobIds());
+            if (args[0].equalsIgnoreCase("summon")) options.add("herobrine");
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("summon") && args[1].equalsIgnoreCase("herobrine")) {
+            options.addAll(List.of("lurking", "stalking", "creeping", "watcher"));
+            for (Player p : Bukkit.getOnlinePlayers()) options.add(p.getName());
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("summon") && args[1].equalsIgnoreCase("herobrine")) {
+            options.addAll(List.of("lurking", "stalking", "creeping", "watcher"));
         }
         String typed = args[args.length - 1].toLowerCase(Locale.ROOT);
         options.removeIf(option -> !option.startsWith(typed));

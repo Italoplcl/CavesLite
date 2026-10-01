@@ -509,10 +509,15 @@ herobrine:
   biomes: []
   y-min: -64
   y-max: 320
-  # % revisado por jugador cada "herobrine-spawn-tick" (ver código, 100 ticks = 5s)
+  # El spawn natural usa un temporizador por jugador, no una tirada de azar cada pocos segundos.
+  # "chance" se conserva solo por compatibilidad con configs antiguas.
   chance: 2
-  # Tiempo mínimo entre apariciones para un mismo jugador
-  cooldown-seconds: 600
+  encounter-interval:
+    # Próximo encuentro natural entre 8 y 20 minutos de juego, elegido aleatoriamente.
+    min-seconds: 480
+    max-seconds: 1200
+  # Protección adicional tras un encuentro.
+  cooldown-seconds: 120
   min-distance-from-player: 10
   max-distance-from-player: 24
   # Dos instancias no aparecen a menos de esta distancia entre sí
@@ -524,8 +529,9 @@ herobrine:
     behind: true
     false-chase: true
     outside-observer: true
-    # Solo puede salir si hay un Creaking cerca
-    creaking: true
+    # Comportamiento inspirado en el Creaking: se congela al mirarlo y se acerca al apartar la vista.
+    # NO requiere que exista un Creaking cerca.
+    watcher: true
     # Encuentros inspirados en el acecho clásico de Herobrine / From The Fog
     lurking: true
     stalking: true
@@ -540,7 +546,7 @@ herobrine:
   # Sistema de acecho. Las distancias siguen la idea de From The Fog, pero la
   # implementación es nativa de Paper/Purpur y no depende del resource/datapack.
   stalking:
-    max-lifetime-seconds: 30
+    max-lifetime-seconds: 45
     lurking:
       min-distance: 50
       max-distance: 80
@@ -553,6 +559,9 @@ herobrine:
       min-distance: 3
       max-distance: 5
       max-lateral: 3
+    watcher:
+      move-interval-ticks: 10
+      step-blocks: 0.8
     sneaky-strike:
       enabled: true
       # Solo CREEPING. Si el jugador todavía no lo descubre tras el retraso,
@@ -571,14 +580,17 @@ herobrine:
     chance: 0.5
   redstone-torches:
     enabled: true
-    chance: 15
-    cooldown-seconds: 600
-    max-per-instance: 5
+    # Se intenta colocar en aire sobre un bloque sólido dentro de 4 bloques de Herobrine.
+    # No rompe ni reemplaza terreno.
+    chance: 12
+    cooldown-seconds: 20
+    max-per-instance: 1
   redstone-on-hit:
     enabled: true
     chance: 10
-  # Textura de cabeza (Value de minecraft-heads.com)
-  head-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="
+  # Textura completa del Mannequin (propiedad textures en Base64).
+  # Por compatibilidad, si skin-value no existe se lee head-value de configs 1.8.x.
+  skin-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="
   combat:
     enabled: true
     # Si no muere antes de esto, escapa y termina el combate

@@ -165,6 +165,10 @@ public final class CavesLite extends JavaPlugin implements Listener {
         bossBar.onQuit(event.getPlayer());
     }
 
+    public HerobrineEncounter getHerobrine() {
+        return herobrine;
+    }
+
     public MobAchievements getAchievements() {
         return achievements;
     }

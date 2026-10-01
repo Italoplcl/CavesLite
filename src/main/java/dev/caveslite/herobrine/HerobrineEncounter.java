@@ -2,7 +2,6 @@ package dev.caveslite.herobrine;
 
 import dev.caveslite.lang.Lang;
 import dev.caveslite.util.Locations;
-import dev.caveslite.util.Materials;
 import dev.caveslite.util.Rng;
 import dev.caveslite.util.Sounds;
 import dev.caveslite.util.Text;
@@ -24,20 +23,18 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -76,7 +73,7 @@ import java.util.logging.Level;
  *   some bar, there's no way to render just a name with nothing else.
  */
 public final class HerobrineEncounter implements Listener {
-    private enum EncounterType { OBSERVE, FLEE_ON_SIGHT, BEHIND, FALSE_CHASE, OUTSIDE_OBSERVER, CREAKING, LURKING, STALKING, CREEPING }
+    public enum EncounterType { OBSERVE, FLEE_ON_SIGHT, BEHIND, FALSE_CHASE, OUTSIDE_OBSERVER, WATCHER, LURKING, STALKING, CREEPING }
 
     private static final NamespacedKey MARKER = new NamespacedKey("dangerouscaves", "herobrine-marker");
     private static final Set<Material> PROTECTED_NEARBY = EnumSet.of(
@@ -104,6 +101,7 @@ public final class HerobrineEncounter implements Listener {
     private final WorldFilter worlds = new WorldFilter();
     private final Map<UUID, Active> active = new HashMap<>();
     private final Map<UUID, Long> playerCooldowns = new HashMap<>();
+    private final Map<UUID, Long> nextEncounter = new HashMap<>();
 
     // config
     private boolean enabled;
@@ -111,6 +109,7 @@ public final class HerobrineEncounter implements Listener {
     private int yMin, yMax;
     private double chance;
     private long cooldownTicks;
+    private long intervalMinTicks, intervalMaxTicks;
     private double minDistance, maxDistance, minDistanceBetween;
     private Set<EncounterType> enabledEncounters = EnumSet.allOf(EncounterType.class);
     private int maxLookSeconds;
@@ -125,7 +124,7 @@ public final class HerobrineEncounter implements Listener {
     private int torchMaxPerInstance;
     private boolean redstoneOnHitEnabled;
     private double redstoneOnHitChance;
-    private ItemStack head;
+    private String skinValue;
     private boolean combatEnabled;
     private long combatMaxDurationTicks;
     private double fleeHealthFraction;
@@ -135,6 +134,8 @@ public final class HerobrineEncounter implements Listener {
     private double stalkingMinDistance, stalkingMaxDistance, stalkingLateral;
     private double creepingMinDistance, creepingMaxDistance, creepingLateral;
     private long stalkingMaxLifetimeTicks;
+    private long watcherMoveIntervalTicks;
+    private double watcherStep;
     private boolean sneakyStrikeEnabled;
     private double sneakyStrikeChance, sneakyStrikeDamage, sneakyStrikeKnockback;
     private long sneakyStrikeDelayTicks;
@@ -154,6 +155,9 @@ public final class HerobrineEncounter implements Listener {
         yMax = cfg.getInt("y-max", 320);
         chance = cfg.getDouble("chance", 2) / 100;
         cooldownTicks = Math.max(1, cfg.getLong("cooldown-seconds", 600)) * 20L;
+        ConfigurationSection interval = cfg.getConfigurationSection("encounter-interval");
+        intervalMinTicks = Math.max(30, interval != null ? interval.getLong("min-seconds", 480) : 480) * 20L;
+        intervalMaxTicks = Math.max(intervalMinTicks, Math.max(60, interval != null ? interval.getLong("max-seconds", 1200) : 1200) * 20L);
         minDistance = cfg.getDouble("min-distance-from-player", 10);
         maxDistance = Math.max(minDistance + 1, cfg.getDouble("max-distance-from-player", 24));
         minDistanceBetween = cfg.getDouble("min-distance-between-instances", 32);
@@ -180,7 +184,8 @@ public final class HerobrineEncounter implements Listener {
             if (encountersCfg.getBoolean("behind", true)) enabledEncounters.add(EncounterType.BEHIND);
             if (encountersCfg.getBoolean("false-chase", true)) enabledEncounters.add(EncounterType.FALSE_CHASE);
             if (encountersCfg.getBoolean("outside-observer", true)) enabledEncounters.add(EncounterType.OUTSIDE_OBSERVER);
-            if (encountersCfg.getBoolean("creaking", true)) enabledEncounters.add(EncounterType.CREAKING);
+            // Backwards compatible: old "creaking" key now means WATCHER behaviour; it never requires a Creaking mob.
+            if (encountersCfg.getBoolean("watcher", encountersCfg.getBoolean("creaking", true))) enabledEncounters.add(EncounterType.WATCHER);
             if (encountersCfg.getBoolean("lurking", true)) enabledEncounters.add(EncounterType.LURKING);
             if (encountersCfg.getBoolean("stalking", true)) enabledEncounters.add(EncounterType.STALKING);
             if (encountersCfg.getBoolean("creeping", true)) enabledEncounters.add(EncounterType.CREEPING);
@@ -202,7 +207,10 @@ public final class HerobrineEncounter implements Listener {
         creepingMinDistance = stalking != null ? stalking.getDouble("creeping.min-distance", 3) : 3;
         creepingMaxDistance = stalking != null ? stalking.getDouble("creeping.max-distance", 5) : 5;
         creepingLateral = stalking != null ? stalking.getDouble("creeping.max-lateral", 3) : 3;
-        stalkingMaxLifetimeTicks = Math.max(5, stalking != null ? stalking.getLong("max-lifetime-seconds", 30) : 30) * 20L;
+        stalkingMaxLifetimeTicks = Math.max(5, stalking != null ? stalking.getLong("max-lifetime-seconds", 45) : 45) * 20L;
+        ConfigurationSection watcherCfg = stalking != null ? stalking.getConfigurationSection("watcher") : null;
+        watcherMoveIntervalTicks = Math.max(4, watcherCfg != null ? watcherCfg.getLong("move-interval-ticks", 10) : 10);
+        watcherStep = Math.max(0.1, watcherCfg != null ? watcherCfg.getDouble("step-blocks", 0.8) : 0.8);
         ConfigurationSection strike = stalking != null ? stalking.getConfigurationSection("sneaky-strike") : null;
         sneakyStrikeEnabled = strike == null || strike.getBoolean("enabled", true);
         sneakyStrikeChance = (strike != null ? strike.getDouble("chance", 10) : 10) / 100;
@@ -229,7 +237,7 @@ public final class HerobrineEncounter implements Listener {
         redstoneOnHitEnabled = onHit == null || onHit.getBoolean("enabled", true);
         redstoneOnHitChance = (onHit != null ? onHit.getDouble("chance", 10) : 10) / 100;
 
-        head = Materials.head(cfg.getString("head-value",
+        skinValue = cfg.getString("skin-value", cfg.getString("head-value",
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="));
 
         ConfigurationSection combat = cfg.getConfigurationSection("combat");
@@ -260,25 +268,28 @@ public final class HerobrineEncounter implements Listener {
         for (World world : Bukkit.getWorlds()) {
             if (!worlds.allows(world)) continue;
             for (Player player : world.getPlayers()) {
-                Long next = playerCooldowns.get(player.getUniqueId());
-                if (next != null && now < next) continue;
-                if (player.getLocation().getBlockY() < yMin || player.getLocation().getBlockY() > yMax) continue;
-                if (!biomes.isEmpty() && !biomes.contains(player.getLocation().getBlock().getBiome())) continue;
-                if (!Rng.chance(chance)) continue;
+                UUID pid = player.getUniqueId();
+                Long cooldown = playerCooldowns.get(pid);
+                if (cooldown != null && now < cooldown) continue;
+                long due = nextEncounter.computeIfAbsent(pid, ignored -> now + randomEncounterDelay());
+                if (now < due) continue;
+                if (player.getLocation().getBlockY() < yMin || player.getLocation().getBlockY() > yMax) { nextEncounter.put(pid, now + 1200L); continue; }
+                if (!biomes.isEmpty() && !biomes.contains(player.getLocation().getBlock().getBiome())) { nextEncounter.put(pid, now + 1200L); continue; }
 
-                trySpawnNear(player, now);
+                if (trySpawnNear(player, now)) nextEncounter.put(pid, now + randomEncounterDelay());
+                else nextEncounter.put(pid, now + 1200L); // retry in one minute when placement/conditions failed
             }
         }
     }
 
-    private void trySpawnNear(Player player, long now) {
+    private boolean trySpawnNear(Player player, long now) {
         EncounterType type = pickEncounterType(player);
-        if (type == null) return;
+        if (type == null) return false;
 
         Location spot = isStalkingType(type) ? findStalkingSpot(player, type) : findSpot(player, type);
-        if (spot == null) return;
+        if (spot == null) return false;
 
-        if (isNearProtectedStructure(spot) || isTooCloseToAnotherInstance(spot)) return;
+        if (isNearProtectedStructure(spot) || isTooCloseToAnotherInstance(spot)) return false;
 
         LivingEntity entity = spawn(spot);
         UUID id = entity.getUniqueId();
@@ -301,16 +312,16 @@ public final class HerobrineEncounter implements Listener {
             positionBehind(entity, player);
             Locations.playSound(entity.getLocation(), footstepSound, SoundCategory.HOSTILE, footstepVolume, footstepPitch);
         }
+        return true;
+    }
+
+    private long randomEncounterDelay() {
+        if (intervalMaxTicks <= intervalMinTicks) return intervalMinTicks;
+        return (long) Rng.nextDouble(intervalMinTicks, intervalMaxTicks + 1);
     }
 
     private EncounterType pickEncounterType(Player player) {
         List<EncounterType> options = new ArrayList<>(enabledEncounters);
-        if (options.contains(EncounterType.CREAKING)) {
-            boolean creakingNearby = !player.getWorld()
-                    .getNearbyEntities(player.getLocation(), 24, 24, 24, e -> e.getType() == EntityType.CREAKING)
-                    .isEmpty();
-            if (!creakingNearby) options.remove(EncounterType.CREAKING);
-        }
         boolean inCave = Locations.isCave(player.getLocation());
         if (options.contains(EncounterType.OUTSIDE_OBSERVER) && inCave) options.remove(EncounterType.OUTSIDE_OBSERVER);
         if (options.isEmpty()) return null;
@@ -357,7 +368,7 @@ public final class HerobrineEncounter implements Listener {
                 Block feet = candidate.getBlock();
                 Block headBlock = feet.getRelative(0, 1, 0);
                 Block floor = feet.getRelative(0, -1, 0);
-                if (feet.getType().isAir() && headBlock.getType().isAir() && floor.getType().isSolid()) {
+                if (isSafeSpawnColumn(feet, headBlock, floor)) {
                     candidate.add(0.5, 0, 0.5);
                     facePlayer(candidate, player);
                     return candidate;
@@ -387,10 +398,25 @@ public final class HerobrineEncounter implements Listener {
             candidate.setY(Math.min(Math.max(highestY + 1, yMin), yMax));
 
             Block feet = candidate.getBlock();
-            if (!feet.getType().isAir() || !feet.getRelative(0, 1, 0).getType().isAir()) continue;
+            Block headBlock = feet.getRelative(0, 1, 0);
+            Block floor = feet.getRelative(0, -1, 0);
+            if (!isSafeSpawnColumn(feet, headBlock, floor)) continue;
+            candidate.add(0.5, 0, 0.5);
+            facePlayer(candidate, player);
             return candidate;
         }
         return null;
+    }
+
+
+    private boolean isSafeSpawnColumn(Block feet, Block headBlock, Block floor) {
+        if (!feet.isPassable() || !headBlock.isPassable()) return false;
+        Material ground = floor.getType();
+        if (!ground.isSolid()) return false;
+        if (floor.isLiquid() || feet.isLiquid() || headBlock.isLiquid()) return false;
+        return ground != Material.MAGMA_BLOCK && ground != Material.CACTUS && ground != Material.CAMPFIRE
+                && ground != Material.SOUL_CAMPFIRE && ground != Material.POWDER_SNOW
+                && ground != Material.FIRE && ground != Material.SOUL_FIRE;
     }
 
     private boolean isNearProtectedStructure(Location spot) {
@@ -414,27 +440,31 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private LivingEntity spawn(Location loc) {
-        Zombie entity = (Zombie) loc.getWorld().spawnEntity(loc, EntityType.ZOMBIE);
+        Mannequin entity = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
         entity.getPersistentDataContainer().set(MARKER, PersistentDataType.BYTE, (byte) 1);
-        entity.setAI(false);
         entity.setSilent(true);
-        entity.setCanPickupItems(false);
         entity.setCustomNameVisible(false);
-        entity.setRemoveWhenFarAway(true);
-        entity.setBaby(false);
-        entity.setShouldBurnInDay(false);
+        entity.setDescription(null);
+        entity.setImmovable(true);
+        entity.setInvulnerable(false);
+        entity.setPersistent(false);
 
         dev.caveslite.util.Utils.setMaxHealth(entity, health);
 
-        EntityEquipment equipment = entity.getEquipment();
-        equipment.setHelmet(head);
-        equipment.setChestplate(null);
-        equipment.setLeggings(null);
-        equipment.setBoots(null);
-        equipment.setItemInMainHand(null);
-        equipment.setItemInOffHand(null);
-
-        entity.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, PotionEffect.INFINITE_DURATION, 0, false, false));
+        // Mannequin renders a real player-shaped body. Reuse the configured texture property
+        // so Herobrine has a complete skin instead of a Zombie body with a player head.
+        if (skinValue != null && !skinValue.isBlank()) {
+            try {
+                ResolvableProfile profile = ResolvableProfile.resolvableProfile()
+                        .name("Herobrine")
+                        .uuid(UUID.nameUUIDFromBytes(("DangerousCavesLite:Herobrine:" + skinValue.hashCode()).getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                        .addProperty(new ProfileProperty("textures", skinValue))
+                        .build();
+                entity.setProfile(profile);
+            } catch (RuntimeException ex) {
+                plugin.getLogger().log(Level.WARNING, "Could not apply Herobrine mannequin skin; using default mannequin profile", ex);
+            }
+        }
         return entity;
     }
 
@@ -503,7 +533,14 @@ public final class HerobrineEncounter implements Listener {
             }
         }
 
-        if (isStalkingType(instance.type())) {
+        if (instance.type() == EncounterType.WATCHER && target != null && target.isOnline()) {
+            // Creaking-inspired behaviour: freeze while watched; approach only when the player looks away.
+            if (watcher == null && (now - instance.spawnTick()) % watcherMoveIntervalTicks < 4) {
+                stepTowardTarget(entity, target);
+            }
+        }
+
+        if (isStalkingType(instance.type()) || instance.type() == EncounterType.WATCHER) {
             if (now - instance.spawnTick() >= stalkingMaxLifetimeTicks) {
                 vanish(entity, instance);
                 return;
@@ -527,16 +564,71 @@ public final class HerobrineEncounter implements Listener {
         maybeSendStopMessage(entity);
     }
 
+    private void stepTowardTarget(LivingEntity entity, Player target) {
+        org.bukkit.util.Vector delta = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
+        if (delta.lengthSquared() < 4.0) return;
+        Location next = entity.getLocation().clone().add(delta.normalize().multiply(watcherStep));
+        Block feet = next.getBlock();
+        Block headBlock = feet.getRelative(0, 1, 0);
+        Block floor = feet.getRelative(0, -1, 0);
+        if (!isSafeSpawnColumn(feet, headBlock, floor)) return;
+        facePlayer(next, target);
+        entity.teleport(next);
+    }
+
     private void tickCombat(LivingEntity entity, Active instance, long now) {
         if (now - instance.combatStartTick().get() > combatMaxDurationTicks) {
             endCombat(instance);
             vanish(entity, instance);
             return;
         }
+        Player target = Bukkit.getPlayer(instance.targetPlayerId());
+        if (target == null || !target.isOnline() || !target.getWorld().equals(entity.getWorld())) {
+            endCombat(instance);
+            vanish(entity, instance);
+            return;
+        }
+        double distanceSq = target.getLocation().distanceSquared(entity.getLocation());
+        if (distanceSq > maxChaseDistance * maxChaseDistance) {
+            endCombat(instance);
+            vanish(entity, instance);
+            return;
+        }
         double fraction = entity.getHealth() / Math.max(1, health);
         if (fraction <= fleeHealthFraction) {
-            flee(entity);
+            stepAwayFromTarget(entity, target, Math.max(0.45, speed * 2.0));
+            return;
         }
+        // Mannequins have no hostile mob AI: DangerousCavesLite owns the chase.
+        if ((now - instance.combatStartTick().get()) % 4L == 0L) {
+            stepTowardTarget(entity, target, Math.max(0.25, speed * 1.6));
+        }
+        if (distanceSq <= 2.4 * 2.4 && (now - instance.combatStartTick().get()) % 20L < 4L) {
+            target.damage(damage, entity);
+        }
+    }
+
+    private void stepTowardTarget(LivingEntity entity, Player target, double step) {
+        org.bukkit.util.Vector delta = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
+        if (delta.lengthSquared() < 1.0) return;
+        Location next = entity.getLocation().clone().add(delta.normalize().multiply(step));
+        if (!canOccupy(next)) return;
+        facePlayer(next, target);
+        entity.teleport(next);
+    }
+
+    private void stepAwayFromTarget(LivingEntity entity, Player target, double step) {
+        org.bukkit.util.Vector delta = entity.getLocation().toVector().subtract(target.getLocation().toVector()).setY(0);
+        if (delta.lengthSquared() < 0.01) return;
+        Location next = entity.getLocation().clone().add(delta.normalize().multiply(step));
+        if (!canOccupy(next)) return;
+        facePlayer(next, target);
+        entity.teleport(next);
+    }
+
+    private boolean canOccupy(Location location) {
+        Block feet = location.getBlock();
+        return isSafeSpawnColumn(feet, feet.getRelative(0, 1, 0), feet.getRelative(0, -1, 0));
     }
 
     private Player nearestWatcher(LivingEntity entity) {
@@ -595,15 +687,30 @@ public final class HerobrineEncounter implements Listener {
         if (!torchesEnabled) return;
         if (instance.torchesLeft().get() >= torchMaxPerInstance) return;
         if (now < instance.nextTorchTick().get()) return;
-        if (!Locations.isCave(entity.getLocation())) return;
         if (!Rng.chance(torchChance)) return;
 
-        Block block = entity.getLocation().getBlock();
-        if (block.getType().isAir()) {
-            block.setType(Material.REDSTONE_TORCH, false);
+        Block placed = findTorchSpot(entity.getLocation());
+        if (placed != null) {
+            placed.setType(Material.REDSTONE_TORCH, false);
             instance.torchesLeft().incrementAndGet();
             instance.nextTorchTick().set(now + torchCooldownTicks);
         }
+    }
+
+    private Block findTorchSpot(Location origin) {
+        // Only places a torch into existing air above a safe solid block; no terrain is removed/replaced.
+        for (int attempt = 0; attempt < 20; attempt++) {
+            int dx = (int) Math.floor(Rng.nextDouble(-4, 5));
+            int dz = (int) Math.floor(Rng.nextDouble(-4, 5));
+            int dy = (int) Math.floor(Rng.nextDouble(-2, 3));
+            Block air = origin.getBlock().getRelative(dx, dy, dz);
+            Block floor = air.getRelative(0, -1, 0);
+            if (!air.getType().isAir() || !floor.getType().isSolid() || floor.isLiquid()) continue;
+            Material ground = floor.getType();
+            if (ground == Material.MAGMA_BLOCK || ground == Material.CACTUS || ground == Material.POWDER_SNOW) continue;
+            return air;
+        }
+        return null;
     }
 
     private void maybeSendStopMessage(LivingEntity entity) {
@@ -638,18 +745,9 @@ public final class HerobrineEncounter implements Listener {
     private void startCombat(LivingEntity entity, Active instance, Player attacker) {
         instance.inCombat().set(true);
         instance.combatStartTick().set(firstWorldTime());
-        entity.setAI(true);
         entity.setInvulnerable(false);
-        entity.removePotionEffect(PotionEffectType.INVISIBILITY);
         entity.setCustomNameVisible(false);
-
-        if (entity instanceof Monster monster) monster.setTarget(attacker);
-        var attribute = entity.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
-        if (attribute != null) attribute.setBaseValue(speed);
-        var attackAttr = entity.getAttribute(org.bukkit.attribute.Attribute.ATTACK_DAMAGE);
-        if (attackAttr != null) attackAttr.setBaseValue(damage);
-        var followAttr = entity.getAttribute(org.bukkit.attribute.Attribute.FOLLOW_RANGE);
-        if (followAttr != null) followAttr.setBaseValue(maxChaseDistance);
+        if (entity instanceof Mannequin mannequin) mannequin.setImmovable(false);
 
         BossBar bar = BossBar.bossBar(Text.legacy(lang.get("herobrine.bossbar-name")), 1f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
         instance.bossBar().set(bar);
@@ -661,21 +759,13 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void flee(LivingEntity entity) {
-        entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, fleeSpeedAmplifier, false, false));
         Player nearest = null;
         double best = Double.MAX_VALUE;
-        for (Entity e : entity.getWorld().getNearbyEntities(entity.getLocation(), 16, 16, 16)) {
-            if (e instanceof Player player) {
-                double d = player.getLocation().distanceSquared(entity.getLocation());
-                if (d < best) { best = d; nearest = player; }
-            }
+        for (Player player : entity.getWorld().getPlayers()) {
+            double d = player.getLocation().distanceSquared(entity.getLocation());
+            if (d < best) { best = d; nearest = player; }
         }
-        if (nearest != null) {
-            org.bukkit.util.Vector away = entity.getLocation().toVector().subtract(nearest.getLocation().toVector());
-            if (away.lengthSquared() > 0.01) {
-                entity.setVelocity(away.normalize().multiply(0.6).setY(0.1));
-            }
-        }
+        if (nearest != null) stepAwayFromTarget(entity, nearest, 0.65);
     }
 
     private void endCombat(Active instance) {
@@ -712,6 +802,31 @@ public final class HerobrineEncounter implements Listener {
 
     private boolean isHerobrine(LivingEntity entity) {
         return entity.getPersistentDataContainer().has(MARKER, PersistentDataType.BYTE);
+    }
+
+    public boolean summonFor(Player target, String requestedType) {
+        EncounterType type;
+        try { type = requestedType == null ? EncounterType.STALKING : EncounterType.valueOf(requestedType.toUpperCase(Locale.ROOT)); }
+        catch (IllegalArgumentException ex) { return false; }
+        long now = firstWorldTime();
+        Location spot = isStalkingType(type) ? findStalkingSpot(target, type) : findSpot(target, type);
+        if (spot == null || isNearProtectedStructure(spot)) return false;
+        LivingEntity entity = spawn(spot);
+        Active instance = new Active(entity.getUniqueId(), type, now,
+                new java.util.concurrent.atomic.AtomicInteger(0), new java.util.concurrent.atomic.AtomicLong(0),
+                new java.util.concurrent.atomic.AtomicLong(0), new java.util.concurrent.atomic.AtomicBoolean(false),
+                new java.util.concurrent.atomic.AtomicLong(0), new java.util.concurrent.atomic.AtomicReference<>(null),
+                target.getUniqueId(), new java.util.concurrent.atomic.AtomicBoolean(false), new java.util.concurrent.atomic.AtomicBoolean(false));
+        active.put(entity.getUniqueId(), instance);
+        return true;
+    }
+
+    public String debug(Player player) {
+        long now = firstWorldTime();
+        long due = nextEncounter.computeIfAbsent(player.getUniqueId(), ignored -> now + randomEncounterDelay());
+        long seconds = Math.max(0, (due - now) / 20L);
+        long own = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId())).count();
+        return "Herobrine: active=" + own + ", next=" + seconds + "s, enabled=" + enabled + ", encounters=" + enabledEncounters;
     }
 
     /** Removes every active Herobrine (used on plugin disable/reload cleanup). */
