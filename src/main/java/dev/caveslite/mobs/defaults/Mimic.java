@@ -128,11 +128,11 @@ public class Mimic extends MobBase implements CustomMob.Ticking, CustomMob.Clean
         }
         entity.remove();
 
-        if (removeOnUnload) {
-            PersistentDataContainer container = block.getChunk().getPersistentDataContainer();
-            container.set(chunkKey, PersistentDataType.INTEGER,
-                    container.getOrDefault(chunkKey, PersistentDataType.INTEGER, 0) + 1);
-        }
+        // Always track the number of plugin-created Mimic chests in the chunk.
+        // This makes limits/cleanup O(loaded chunks) without scanning every tile entity.
+        PersistentDataContainer container = block.getChunk().getPersistentDataContainer();
+        container.set(chunkKey, PersistentDataType.INTEGER,
+                container.getOrDefault(chunkKey, PersistentDataType.INTEGER, 0) + 1);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -230,9 +230,8 @@ public class Mimic extends MobBase implements CustomMob.Ticking, CustomMob.Clean
     private int countActiveChests(World world) {
         int count = 0;
         for (Chunk chunk : world.getLoadedChunks()) {
-            for (BlockState tile : chunk.getTileEntities()) {
-                if (isMimicChest(tile)) count++;
-            }
+            count += Math.max(0, chunk.getPersistentDataContainer()
+                    .getOrDefault(chunkKey, PersistentDataType.INTEGER, 0));
         }
         return count;
     }
@@ -254,12 +253,17 @@ public class Mimic extends MobBase implements CustomMob.Ticking, CustomMob.Clean
         int removed = 0;
         for (World world : Bukkit.getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {
+                PersistentDataContainer pdc = chunk.getPersistentDataContainer();
+                int expected = pdc.getOrDefault(chunkKey, PersistentDataType.INTEGER, 0);
+                if (expected <= 0) continue;
+                int remaining = expected;
                 for (BlockState tile : chunk.getTileEntities()) {
-                    if (isMimicChest(tile) && isExpired(tile)) {
-                        tile.getBlock().setType(Material.AIR, false);
-                        removed++;
-                    }
+                    if (remaining <= 0) break;
+                    if (!isMimicChest(tile)) continue;
+                    if (isExpired(tile)) { tile.getBlock().setType(Material.AIR, false); removed++; remaining--; }
                 }
+                if (remaining <= 0) pdc.remove(chunkKey);
+                else if (remaining != expected) pdc.set(chunkKey, PersistentDataType.INTEGER, remaining);
             }
         }
         return removed;
@@ -270,13 +274,15 @@ public class Mimic extends MobBase implements CustomMob.Ticking, CustomMob.Clean
         int removed = 0;
         for (World world : Bukkit.getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {
+                PersistentDataContainer pdc = chunk.getPersistentDataContainer();
+                int expected = pdc.getOrDefault(chunkKey, PersistentDataType.INTEGER, 0);
+                if (expected <= 0) continue;
+                int remaining = expected;
                 for (BlockState tile : chunk.getTileEntities()) {
-                    if (isMimicChest(tile)) {
-                        tile.getBlock().setType(Material.AIR, false);
-                        removed++;
-                    }
+                    if (remaining <= 0) break;
+                    if (isMimicChest(tile)) { tile.getBlock().setType(Material.AIR, false); removed++; remaining--; }
                 }
-                chunk.getPersistentDataContainer().remove(chunkKey);
+                pdc.remove(chunkKey);
             }
         }
         return removed;
@@ -284,9 +290,17 @@ public class Mimic extends MobBase implements CustomMob.Ticking, CustomMob.Clean
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLoad(ChunkLoadEvent event) {
+        PersistentDataContainer pdc = event.getChunk().getPersistentDataContainer();
+        int expected = pdc.getOrDefault(chunkKey, PersistentDataType.INTEGER, 0);
+        if (expected <= 0) return;
+        int remaining = expected;
         for (BlockState tile : event.getChunk().getTileEntities()) {
-            if (isMimicChest(tile) && isExpired(tile)) tile.getBlock().setType(Material.AIR, false);
+            if (remaining <= 0) break;
+            if (!isMimicChest(tile)) continue;
+            if (isExpired(tile)) { tile.getBlock().setType(Material.AIR, false); remaining--; }
         }
+        if (remaining <= 0) pdc.remove(chunkKey);
+        else if (remaining != expected) pdc.set(chunkKey, PersistentDataType.INTEGER, remaining);
     }
 
     // ------------------------------------------------- cleanup of leftover chests

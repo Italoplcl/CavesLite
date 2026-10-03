@@ -11,7 +11,10 @@ public interface CustomMob {
     /** Lower-case-with-hyphens id, also the config section name under "mobs". */
     String id();
 
-    /** Weight in the spawn pool. 0 disables natural spawning. */
+    /** Explicit natural-spawn switch. Manual summon remains available while disabled. */
+    default boolean enabled() { return true; }
+
+    /** Weight in the natural spawn pool. */
     int weight();
 
     /** Optional common natural-spawn limits. */

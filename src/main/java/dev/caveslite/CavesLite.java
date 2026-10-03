@@ -165,6 +165,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         leaderboard.reload(Utils.section(config, "leaderboards"));
         herobrine.reload(Utils.section(config, "herobrine"));
         mobs.reload(Utils.section(config, "mobs"));
+        if (adminDialogs != null) adminDialogs.reload();
     }
 
     @Override

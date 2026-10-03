@@ -16,7 +16,7 @@ public final class SpiderJockeyAnomaly extends MobBase {
     @Override public LivingEntity spawn(Location loc) {
         Spider spider = (Spider) loc.getWorld().spawnEntity(loc, EntityType.SPIDER);
         Skeleton rider = (Skeleton) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
-        TagHelper.setTag(spider, id()); TagHelper.setTag(rider, id());
+        finishSpawn(spider); TagHelper.setTag(rider, id());
         spider.addPassenger(rider);
         return spider;
     }

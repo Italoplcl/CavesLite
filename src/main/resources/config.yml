@@ -329,9 +329,11 @@ mobs:
   # Alpha Spider
   # Spawns cave-spiders as minions and covers player in cobweb
   alpha-spider:
+    enabled: false
     priority: 0
     health: 18
     name: "&4Alpha Spider"
+    show-name: false
     # When spider is damaged
     cobweb-chance: 14.29
     # When spider is damaged
@@ -340,8 +342,10 @@ mobs:
   # Crying Bat
   # Just screams and eventually dies. What a legend
   crying-bat:
+    enabled: false
     priority: 0
     name: "&4Crying Bat"
+    show-name: false
     # Every ENTITY tick
     cry-chance: 3.33
     # Every ENTITY tick if cry was successful
@@ -350,8 +354,10 @@ mobs:
   # Dead Miner
   # Places torches when it's too dark and drops some items when damaged
   dead-miner:
+    enabled: false
     priority: 0
     name: "&4Dead Miner"
+    show-name: false
     health: 22
     # Get your custom head here https://minecraft-heads.com/
     # Just copy a "Value" (with =)
@@ -376,8 +382,10 @@ mobs:
   # Hexed Armor
   # When attacks gives player all its armor
   hexed-armor:
+    enabled: false
     priority: 0
     name: "&4Hexed Armor"
+    show-name: false
     health: 20
     # Add binding curse to armor
     binding-curse: true
@@ -387,8 +395,10 @@ mobs:
   # Hungering Darkness
   # Spawns in the dark and kills player if there's no light
   hungering-darkness:
+    enabled: false
     priority: 0
     name: ""
+    show-name: false
     # Kill the entity on light?
     remove-on-light: false
     # Play death sound on light?
@@ -401,8 +411,10 @@ mobs:
   # Lava Creeper
   # When blows up creates a crater with magma, obsidian and lava
   lava-creeper:
+    enabled: false
     priority: 0
     name: "&4Lava Creeper"
+    show-name: false
     health: 20
     # When Lava Creeper is damaged. In ticks
     fire-touch: 10
@@ -419,8 +431,10 @@ mobs:
   # Magma Monster
   # Leaves a trail of magma on its way
   magma-monster:
+    enabled: false
     priority: 0
     name: "&4Magma Monster"
+    show-name: false
     health: 20
     # If monster is extinguished it will receive damage
     extinguished-damage: false
@@ -434,8 +448,10 @@ mobs:
   # Smoke Demon
   # Creates a smoke and gives wither effect
   smoke-demon:
+    enabled: false
     priority: 0
     name: ""
+    show-name: false
     health: 20
     # Radius in blocks
     harm-radius: 3
@@ -445,8 +461,10 @@ mobs:
   # TNT Creeper
   # Spawns additional TNTs when explodes and creates small explosion when damaged
   tnt-creeper:
+    enabled: false
     priority: 0
     name: "&4TNT Creeper"
+    show-name: false
     health: 20
     # Amount of TNT to spawn after explosion
     tnt-amount: 2
@@ -456,8 +474,10 @@ mobs:
   # Watcher
   # Just jumpscares a player
   watcher:
+    enabled: false
     priority: 0
     name: "&4Watcher"
+    show-name: false
     health: 20
     # Get your custom head here https://minecraft-heads.com/
     # Just copy a "Value" (with =)
@@ -466,8 +486,12 @@ mobs:
   # Mimic
   # Becomes a chest when it has no target
   mimic:
+    enabled: false
     priority: 0
+    # Limita tanto Mimics vivos como cofres activos para evitar acumulacion.
+    max-active: 1
     name: "&4Mimic"
+    show-name: false
     health: 30
     # No crea un cofre Mimic si ya existe cualquier cofre dentro de este radio.
     min-distance-from-chest: 16
@@ -490,8 +514,10 @@ mobs:
   # Cave Golem
   # Has strong attack, can be damaged only with pickaxe, drops its head on death
   cave-golem:
+    enabled: false
     priority: 0
     name: "&4Cave Golem"
+    show-name: false
     health: 35
     # Give Cave Golem slowness effect
     slowness: true
@@ -515,58 +541,70 @@ mobs:
   # --- Nuevos encuentros 1.10 ---
   # Todos permanecen desactivados hasta que un administrador los habilite.
   giant-zombie:
+    enabled: false
     priority: 0
     spawn-y-min: 80
     spawn-y-max: 320
     cooldown-seconds: 600
     max-active: 1
     name: "&4Giant Zombie"
+    show-name: false
     health: 80
 
   chicken-jockey:
+    enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
     name: "&cChicken Jockey"
+    show-name: false
     health: 16
     speed-amplifier: 3
 
   killer-bunny:
+    enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
     name: "&4The Killer Bunny"
+    show-name: false
     health: 12
 
   illusioner:
+    enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
     name: "&5Illusioner"
+    show-name: false
     health: 32
 
   spider-jockey:
+    enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
     name: "&4Spider Jockey"
+    show-name: false
     health: 20
 
   skeleton-horseman:
+    enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
     name: "&7Skeleton Horseman"
+    show-name: false
     health: 30
 
 # Herobrine: encuentro de terror psicológico. No es un boss tradicional - la

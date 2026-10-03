@@ -20,7 +20,7 @@ public final class ChickenJockeyAnomaly extends MobBase {
         Chicken chicken = (Chicken) loc.getWorld().spawnEntity(loc, EntityType.CHICKEN);
         Zombie rider = (Zombie) loc.getWorld().spawnEntity(loc, EntityType.ZOMBIE);
         rider.setBaby();
-        TagHelper.setTag(chicken, id());
+        finishSpawn(chicken);
         TagHelper.setTag(rider, id());
         chicken.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, PotionEffect.INFINITE_DURATION, speedAmplifier, false, true));
         chicken.addPassenger(rider);

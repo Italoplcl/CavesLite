@@ -90,7 +90,7 @@ public final class MobManager implements Listener {
         pool = new WeightedPool<>();
         for (CustomMob mob : mobs.values()) {
             mob.reload(Utils.section(cfg, mob.id()));
-            pool.add(mob, mob.weight());
+            if (mob.enabled() && mob.weight() > 0) pool.add(mob, mob.weight());
         }
     }
 
@@ -217,7 +217,8 @@ public final class MobManager implements Listener {
         };
         for (World world : Bukkit.getWorlds()) {
             for (LivingEntity entity : world.getLivingEntities()) {
-                if (TagHelper.isTagged(entity) && filter.test(entity)) remover.accept(entity);
+                String id = TagHelper.getTag(entity);
+                if (id != null && mobs.containsKey(id) && filter.test(entity)) remover.accept(entity);
             }
         }
         return count[0];

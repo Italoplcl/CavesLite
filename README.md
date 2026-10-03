@@ -80,3 +80,11 @@ compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log de
 - Mimic evita crear cofres cerca de otros cofres, limita los cofres Mimic activos, tiene tiempo de vida y sus cofres temporales se limpian con `/dcaves kill`, descarga de chunk y apagado normal del plugin.
 
 > Al probar esta versión sobre una instalación anterior, usa un `config.yml` nuevo si quieres verificar los nuevos valores por defecto; Bukkit no reemplaza automáticamente las opciones ya existentes del administrador.
+
+## 1.10.1
+- `enabled` real e independiente de `priority` para cada mob; todos OFF por defecto.
+- Dialog principal cacheado y apariencia editable desde `dialogs.yml`.
+- Nombre y visibilidad del nombre configurables por mob desde Dialog.
+- Encuentros compuestos usan la configuracion comun de nombre/salud.
+- `/dcaves kill` valida IDs registrados del plugin antes de eliminar entidades.
+- Mimic: limite activo reforzado y limpieza optimizada mediante PDC por chunk.

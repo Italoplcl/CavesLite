@@ -16,7 +16,7 @@ public final class SkeletonHorsemanAnomaly extends MobBase {
     @Override public LivingEntity spawn(Location loc) {
         SkeletonHorse horse = (SkeletonHorse) loc.getWorld().spawnEntity(loc, EntityType.SKELETON_HORSE);
         Skeleton rider = (Skeleton) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
-        TagHelper.setTag(horse, id()); TagHelper.setTag(rider, id());
+        finishSpawn(horse); TagHelper.setTag(rider, id());
         horse.addPassenger(rider);
         return horse;
     }

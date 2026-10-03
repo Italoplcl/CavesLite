@@ -20,7 +20,9 @@ public abstract class MobBase implements CustomMob {
     private final Double defHealth;
     private final String defName;
 
+    private boolean enabled;
     private int weight;
+    private boolean showName;
     protected Component name;
     protected Double health;
     private int spawnYMin = Integer.MIN_VALUE;
@@ -47,6 +49,9 @@ public abstract class MobBase implements CustomMob {
     }
 
     @Override
+    public boolean enabled() { return enabled; }
+
+    @Override
     public int weight() {
         return weight;
     }
@@ -68,7 +73,9 @@ public abstract class MobBase implements CustomMob {
 
     @Override
     public void reload(ConfigurationSection cfg) {
-        weight = cfg.getInt("priority", defWeight);
+        enabled = cfg.getBoolean("enabled", false);
+        weight = Math.max(0, cfg.getInt("priority", defWeight));
+        showName = cfg.getBoolean("show-name", false);
         spawnYMin = cfg.getInt("spawn-y-min", Integer.MIN_VALUE);
         spawnYMax = cfg.getInt("spawn-y-max", Integer.MAX_VALUE);
         maxActive = Math.max(0, cfg.getInt("max-active", 0));
@@ -91,15 +98,18 @@ public abstract class MobBase implements CustomMob {
     protected void prepare(LivingEntity entity) {
     }
 
-    @Override
-    public LivingEntity spawn(Location loc) {
-        LivingEntity entity = (LivingEntity) loc.getWorld().spawnEntity(loc, type);
+    /** Applies the common identity/configuration to the primary entity of an encounter. */
+    protected LivingEntity finishSpawn(LivingEntity entity) {
         TagHelper.setTag(entity, id);
         entity.customName(name);
-        if (health != null) {
-            Utils.setMaxHealth(entity, health);
-        }
+        entity.setCustomNameVisible(showName && name != null);
+        if (health != null) Utils.setMaxHealth(entity, health);
         prepare(entity);
         return entity;
+    }
+
+    @Override
+    public LivingEntity spawn(Location loc) {
+        return finishSpawn((LivingEntity) loc.getWorld().spawnEntity(loc, type));
     }
 }
