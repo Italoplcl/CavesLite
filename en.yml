@@ -1,0 +1,21 @@
+# Language file - English. Edit any line without touching plugin code; use
+# {placeholder} where noted. Color codes (&a, &4, etc.) work the same way
+# as in config.yml.
+
+command:
+  list: "&7Custom mobs: &f{mobs}"
+  reload: "&aConfig reloaded."
+  kill-removed: "&aRemoved &e{amount}&a custom mob(s)."
+  usage: "&7Usage: &f/{label} <list|summon <mob> [x y z [world]]|kill [mob]|kills [player]|reload>"
+  kills-specify-player: "&cSpecify an online player: &f/{label} kills <player>"
+  kills-result: "&7{player}&7's custom mob kills: &e{amount}"
+  summon-specify-mob: "&cSpecify a mob: &f/{label} summon <mob>"
+  summon-unknown-mob: "&cUnknown mob &e{mob}&c. Available: &f{mobs}"
+  summon-specify-coords: "&cGive coordinates: &f/{label} summon {mob} <x> <y> <z> [world]"
+  summon-success: "&aSummoned &e{mob}&a."
+
+herobrine:
+  # Extremely rare message that sometimes shows up in chat. No explanation.
+  stop-message: "&8Stop."
+  # Name shown on the boss bar, only while in combat.
+  bossbar-name: "&4&lHEROBRINE"

@@ -1,0 +1,730 @@
+# DangerousCaves (Lite): sonidos ambientales + mobs personalizados.
+# Basado en Dangerous Caves 2 (MIT, imDaniX / Evil-Lootlye).
+# Los nombres de las opciones son los mismos que en la config original,
+# asi que tu config.yml antigua sigue funcionando (las secciones que ya
+# no existen se ignoran).
+
+# Idioma de todos los mensajes del plugin (comandos, Herobrine, etc.).
+# Corresponde a un archivo en la carpeta lang/ (es.yml y en.yml vienen
+# incluidos; puedes agregar los que quieras y usar su mismo nombre aquí).
+language: es
+
+caverns:
+  # Ambient Sounds - special sound may be played underground
+  ambient:
+    enabled: true
+    # List of worlds where ambient sounds can be played
+    worlds:
+      - world
+    # Chance of sound will be played
+    # Checking every PLAYER tick
+    chance: 6.35
+    # Maximal Y where sound can be played
+    y-max: 64
+    # Play sound in random location near player. 0 to play sound on player's location
+    near: 7
+    # Everyone will hear a sound in its radius
+    server-wise: true
+    # Minimal distance between sound sources if server-wise option is used.
+    # May affect performance when enabled. Set to 0 or lower to disable
+    server-wise-distance: 0
+    # List of sounds to play - you can add more or remove some.
+    # "weight" controls how often each one gets picked relative to the
+    # others (default 10). Give the scariest ones a lower weight so they
+    # stay rare and hit harder.
+    sounds:
+      MUSIC_DISC_11:
+        volume: 1
+        pitch: 0.5
+        weight: 10
+      ENCHANT_THORNS_HIT:
+        volume: 0.04
+        pitch: 0.2
+        weight: 10
+      ENTITY_GHAST_SCREAM:
+        volume: 1
+        pitch: 0.5
+        weight: 8
+      MUSIC_DISC_13:
+        volume: 1
+        pitch: 1
+        weight: 10
+      AMBIENT_CAVE:
+        volume: 1
+        pitch: 0.8
+        weight: 10
+      BLOCK_SCULK_SHRIEKER_SHRIEK:
+        volume: 0.6
+        pitch: 0.6
+        weight: 4
+      ENTITY_WARDEN_NEARBY_CLOSE:
+        volume: 0.5
+        pitch: 1
+        weight: 2
+      ENTITY_ENDERMAN_STARE:
+        volume: 0.7
+        pitch: 0.7
+        weight: 6
+      ENTITY_WITHER_AMBIENT:
+        volume: 0.3
+        pitch: 0.4
+        weight: 3
+
+    # The deeper a player is, the more often ambient sounds play and the
+    # lower-pitched (spookier) they sound. Set enabled: false to go back to
+    # a flat chance everywhere.
+    depth-scaling:
+      enabled: true
+      # At or below this Y, the effect is at its strongest.
+      y-full: -32
+      # At or above this Y (but still a cave), the effect does nothing.
+      y-none: 60
+      # "chance" above is multiplied by up to this much at y-full.
+      max-chance-multiplier: 3.0
+      # How much is subtracted from a sound's pitch at y-full.
+      pitch-drop: 0.3
+
+    # Ghost footsteps: a step sound plays a few blocks behind a lone player
+    # underground. No mob is actually there.
+    footsteps:
+      enabled: true
+      worlds:
+        - world
+      # Chance checked every 3 seconds (60 ticks)
+      chance: 8
+      y-max: 40
+      # Only plays when the player has no one else within 20 blocks
+      require-alone: true
+      distance: 4
+      behind-only: true
+      sound: minecraft:block.stone.step
+      volume: 0.6
+      pitch: 0.75
+
+# Heartbeat that speeds up when a scary custom mob is nearby.
+tension:
+  enabled: true
+  # Which custom mobs (by id) trigger the heartbeat
+  mobs:
+    - watcher
+    - hungering-darkness
+    - smoke-demon
+  # How far away (in blocks) a watched mob starts the heartbeat
+  radius: 16
+  # Beat interval, in ticks, when the mob is at the edge of "radius" / right on top of the player
+  max-interval-ticks: 60
+  min-interval-ticks: 10
+  sound: minecraft:block.sculk_sensor.clicking
+  volume: 1
+  pitch: 1
+
+# Shows a boss bar naming whichever enabled mob is closest to each player.
+boss-bar:
+  enabled: false
+  worlds:
+    - world
+  # How far away (in blocks) a mob has to be to show up in the bar
+  radius: 24
+  # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
+  format: "&4{mob} &7cerca..."
+  # "distance" -> bar fills up the closer the mob gets.
+  # "health" -> bar shows the mob's remaining health instead.
+  progress: distance
+  # RED, BLUE, GREEN, PINK, PURPLE, WHITE, YELLOW
+  color: RED
+  # PROGRESS (solid bar), or NOTCHED_6 / NOTCHED_10 / NOTCHED_12 / NOTCHED_20 (segmented)
+  style: PROGRESS
+  # Which mobs show up in the bar. false = never shown for that mob.
+  mobs:
+    alpha-spider: false
+    cave-golem: false
+    crying-bat: false
+    dead-miner: false
+    hexed-armor: false
+    hungering-darkness: false
+    lava-creeper: false
+    magma-monster: false
+    mimic: false
+    smoke-demon: false
+    tnt-creeper: false
+    watcher: false
+    giant-zombie: false
+    chicken-jockey: false
+    killer-bunny: false
+    illusioner: false
+    spider-jockey: false
+    skeleton-horseman: false
+
+# Dramatic title/subtitle flash to nearby players when an enabled mob spawns.
+spawn-titles:
+  enabled: true
+  radius: 20
+  # How far apart (in ticks) a single player can be shown a title again, so a
+  # burst of spawns doesn't spam their screen.
+  cooldown-ticks: 100
+  fade-in-ticks: 10
+  stay-ticks: 40
+  fade-out-ticks: 10
+  title: "&4\u00a1Cuidado!"
+  # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
+  subtitle: "&7{mob} ha aparecido cerca"
+  mobs:
+    alpha-spider: true
+    cave-golem: true
+    crying-bat: false
+    dead-miner: true
+    hexed-armor: true
+    hungering-darkness: true
+    lava-creeper: true
+    magma-monster: true
+    mimic: true
+    smoke-demon: true
+    tnt-creeper: true
+    watcher: true
+
+# Short Action Bar message shown while an enabled mob is close to a player.
+warnings:
+  enabled: true
+  radius: 10
+  message: "&7Sientes que algo te observa..."
+  mobs:
+    alpha-spider: false
+    cave-golem: false
+    crying-bat: false
+    dead-miner: false
+    hexed-armor: true
+    hungering-darkness: true
+    lava-creeper: false
+    magma-monster: false
+    mimic: true
+    smoke-demon: true
+    tnt-creeper: false
+    watcher: true
+
+# Faint particle trail left behind specific mobs. Disabled per-mob by default;
+# turn on the ones you want.
+trails:
+  enabled: true
+  # How far from a player a mob still gets its trail rendered
+  radius: 32
+  mobs:
+    watcher:
+      enabled: true
+      particle: SOUL
+      count: 2
+      offset: 0.25
+    smoke-demon:
+      enabled: true
+      particle: SMOKE
+      count: 2
+      offset: 0.3
+    hungering-darkness:
+      enabled: false
+      particle: SQUID_INK
+      count: 1
+      offset: 0.2
+
+# Plugin-side "achievements": counts kills of ANY enabled custom mob per
+# player and celebrates when a threshold is reached. This is NOT a vanilla
+# Minecraft advancement (no toast in the Advancements menu, no F key entry) -
+# that would require a datapack shipped alongside the plugin.
+achievements:
+  enabled: true
+  broadcast: true
+  sound: minecraft:ui.toast.challenge_complete
+  # Money rewards, paid through Vault - works with whatever economy plugin
+  # is behind it (CMI, EssentialsX, or anything else Vault-compatible).
+  # If Vault (or an economy plugin) isn't installed, this is silently skipped.
+  economy:
+    enabled: true
+    # Paid on every custom mob kill, on top of any threshold reward below
+    per-kill: 3
+  # kills: label shown in the title/chat, plus its own money reward (0 = none)
+  thresholds:
+    5:
+      label: "&6Cazador Novato"
+      reward: 25
+    15:
+      label: "&6Cazador de las Profundidades"
+      reward: 75
+    30:
+      label: "&4Terror de las Cuevas"
+      reward: 150
+    50:
+      label: "&4Leyenda de las Cavernas"
+      reward: 300
+
+# "Who's killed the most custom mobs" leaderboards, for PlaceholderAPI
+# (%dangerouscaves_top_kills_1_name%, etc. - see CavesPlaceholders.java for
+# the full list). A kill always updates the count immediately, but the
+# sorted ranking and its own save file (leaderboards.yml) only refresh
+# periodically - see "update-interval-ticks" - so this never saves to disk
+# on every single kill.
+leaderboards:
+  enabled: true
+  update-interval-ticks: 100
+  # How many ranks are kept/available. Placeholders past this return empty.
+  top-size: 10
+  # Leaderboard combining kills of every custom mob together
+  total: true
+  # Per-mob leaderboards: off by default. Each one you enable here means the
+  # plugin tracks (and stores) that mob's kills separately per player - if
+  # you only care about the ranking for one or two mobs, only turn those on;
+  # leaving the rest off keeps this feature lighter.
+  mobs:
+    alpha-spider: false
+    cave-golem: false
+    crying-bat: false
+    dead-miner: false
+    hexed-armor: false
+    hungering-darkness: false
+    lava-creeper: false
+    magma-monster: false
+    mimic: false
+    smoke-demon: false
+    tnt-creeper: false
+    watcher: false
+
+mobs:
+  enabled: true
+
+  # Chance of spawning custom mob instead of vanilla one
+  try-chance: 25
+
+  # World where mob can spawn(and work as it's intended to work)
+  worlds:
+    - world
+
+  # Minimal and maximal Y coordinate where custom mobs can spawn.
+  # (Since 1.18 caves go down to Y -64, so y-min is -64 by default.)
+  y-min: -64
+  y-max: 64
+
+  # Block renaming with name-tags
+  restrict-rename: false
+
+  # Maximal light level where mobs can spawn. Vanilla level for monsters is 7. Set to 16 or more to disable
+  max-light-level: 16
+
+  # Only these mobs will be replaced
+  replace-mobs:
+    - ZOMBIE
+    - HUSK
+    - SKELETON
+    - STRAY
+    - CREEPER
+    - SPIDER
+    - WITCH
+    - ENDERMAN
+
+  # List of *default* custom mobs
+
+  # To disable mob's name just leave it blank, like
+  #   name: ""
+  # Larger priority - larger chance to spawn in comparison with others.
+  # Set priority to 0 to disable mob, like
+  #   priority: 0
+  # Spawn chance formula - (mob_priority)/(total_priority)
+
+  # Alpha Spider
+  # Spawns cave-spiders as minions and covers player in cobweb
+  alpha-spider:
+    enabled: false
+    priority: 0
+    health: 18
+    name: "&4Alpha Spider"
+    show-name: false
+    # When spider is damaged
+    cobweb-chance: 14.29
+    # When spider is damaged
+    minion-chance: 6.67
+
+  # Crying Bat
+  # Just screams and eventually dies. What a legend
+  crying-bat:
+    enabled: false
+    priority: 0
+    name: "&4Crying Bat"
+    show-name: false
+    # Every ENTITY tick
+    cry-chance: 3.33
+    # Every ENTITY tick if cry was successful
+    death-chance: 20
+
+  # Dead Miner
+  # Places torches when it's too dark and drops some items when damaged
+  dead-miner:
+    enabled: false
+    priority: 0
+    name: "&4Dead Miner"
+    show-name: false
+    health: 22
+    # Get your custom head here https://minecraft-heads.com/
+    # Just copy a "Value" (with =)
+    head-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzE5MzdiY2Q1YmVlYWEzNDI0NDkxM2YyNzc1MDVlMjlkMmU2ZmIzNWYyZTIzY2E0YWZhMmI2NzY4ZTM5OGQ3MyJ9fX0="
+    # Place torches when it's too dark?
+    place-torches: true
+    # Place redstone torches instead of normal?
+    red-torches: false
+    # Place torches only if Dead Miner has entity as a target?
+    requires-target: false
+    # Cooldown in seconds between torches placing. Useful for preventing torch farms. Set to 0 to disable
+    torches-cooldown: 12
+    # When Dead Miner is damaged
+    drop-chance: 30
+    # Materials list
+    drop-items:
+      - COBBLESTONE
+      - DIRT
+      - COAL
+      - TORCH
+
+  # Hexed Armor
+  # When attacks gives player all its armor
+  hexed-armor:
+    enabled: false
+    priority: 0
+    name: "&4Hexed Armor"
+    show-name: false
+    health: 20
+    # Add binding curse to armor
+    binding-curse: true
+    # When player is attacked
+    apply-chance: 25
+
+  # Hungering Darkness
+  # Spawns in the dark and kills player if there's no light
+  hungering-darkness:
+    enabled: false
+    priority: 0
+    name: ""
+    show-name: false
+    # Kill the entity on light?
+    remove-on-light: false
+    # Play death sound on light?
+    death-sound: true
+    # Is night vision effect considered as light?
+    night-vision: false
+    # When player is attacked
+    damage: 200
+
+  # Lava Creeper
+  # When blows up creates a crater with magma, obsidian and lava
+  lava-creeper:
+    enabled: false
+    priority: 0
+    name: "&4Lava Creeper"
+    show-name: false
+    health: 20
+    # When Lava Creeper is damaged. In ticks
+    fire-touch: 10
+    # Radius in blocks
+    radius: 4
+    # Chance that the block will be changed
+    change-chance: 50
+    block-chances:
+      fire: 33.33
+      magma_block: 25
+      obsidian: 20
+      lava: 16.67
+
+  # Magma Monster
+  # Leaves a trail of magma on its way
+  magma-monster:
+    enabled: false
+    priority: 0
+    name: "&4Magma Monster"
+    show-name: false
+    health: 20
+    # If monster is extinguished it will receive damage
+    extinguished-damage: false
+    # Placing fire. Every ENTITY tick
+    fire-chance: 7.14
+    # Placing magma-blocks. Every ENTITY tick
+    magma-chance: 3.57
+    # Place magma and fire only if Magma Monster has entity as a target?
+    requires-target: true
+
+  # Smoke Demon
+  # Creates a smoke and gives wither effect
+  smoke-demon:
+    enabled: false
+    priority: 0
+    name: ""
+    show-name: false
+    health: 20
+    # Radius in blocks
+    harm-radius: 3
+    # Condition for spawning and harm/wither effect
+    max-light: 11
+
+  # TNT Creeper
+  # Spawns additional TNTs when explodes and creates small explosion when damaged
+  tnt-creeper:
+    enabled: false
+    priority: 0
+    name: "&4TNT Creeper"
+    show-name: false
+    health: 20
+    # Amount of TNT to spawn after explosion
+    tnt-amount: 2
+    # When TNT Creeper is damaged
+    explosion-chance: 33.33
+
+  # Watcher
+  # Just jumpscares a player
+  watcher:
+    enabled: false
+    priority: 0
+    name: "&4Watcher"
+    show-name: false
+    health: 20
+    # Get your custom head here https://minecraft-heads.com/
+    # Just copy a "Value" (with =)
+    head-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDI5MzhmMjQxZDc0NDMzZjcyZjVjMzljYjgzYThlNWZmN2UxNzdiYTdjYjQyODY5ZGI2NGUzMDc5MTAyYmZjNSJ9fX0="
+
+  # Mimic
+  # Becomes a chest when it has no target
+  mimic:
+    enabled: false
+    priority: 0
+    # Limita tanto Mimics vivos como cofres activos para evitar acumulacion.
+    max-active: 1
+    name: "&4Mimic"
+    show-name: false
+    health: 30
+    # No crea un cofre Mimic si ya existe cualquier cofre dentro de este radio.
+    min-distance-from-chest: 16
+    # Máximo de cofres Mimic activos simultáneamente por mundo.
+    max-active-chests: 1
+    # Un cofre Mimic sin descubrir desaparece después de este tiempo. 0 = sin límite.
+    lifetime-seconds: 900
+    # Recomendado: elimina el cofre Mimic antes de que su chunk se descargue.
+    remove-on-unload: true
+    # List of dropped materials after death
+    drop-items:
+      - BOOK
+      - SADDLE
+      - OAK_PLANKS
+      - TORCH
+      - COAL
+      - GOLDEN_APPLE
+      - COBWEB
+
+  # Cave Golem
+  # Has strong attack, can be damaged only with pickaxe, drops its head on death
+  cave-golem:
+    enabled: false
+    priority: 0
+    name: "&4Cave Golem"
+    show-name: false
+    health: 35
+    # Give Cave Golem slowness effect
+    slowness: true
+    # When Cave Golem is attacking give its victim slowness, nausea and blindness effects
+    distract-attack: true
+    # Damage multiplier when Cave Golem is attacking
+    damage-modifier: 2.0
+    # Damage multiplier when player is attacking Cave Golem without pickaxe
+    nonpickaxe-modifier: 0.07
+    # These blocks will be on Cave Golem's head and will be dropped after death
+    variants:
+      - COAL_ORE
+      - IRON_ORE
+      - GOLD_ORE
+      - LAPIS_ORE
+      - DIAMOND_ORE
+      - EMERALD_ORE
+    # Chance of spawning from block (only variants above)
+    spawn-from-block: 0.5
+
+  # --- Nuevos encuentros 1.10 ---
+  # Todos permanecen desactivados hasta que un administrador los habilite.
+  giant-zombie:
+    enabled: false
+    priority: 0
+    spawn-y-min: 80
+    spawn-y-max: 320
+    cooldown-seconds: 600
+    max-active: 1
+    name: "&4Giant Zombie"
+    show-name: false
+    health: 80
+
+  chicken-jockey:
+    enabled: false
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&cChicken Jockey"
+    show-name: false
+    health: 16
+    speed-amplifier: 3
+
+  killer-bunny:
+    enabled: false
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&4The Killer Bunny"
+    show-name: false
+    health: 12
+
+  illusioner:
+    enabled: false
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&5Illusioner"
+    show-name: false
+    health: 32
+
+  spider-jockey:
+    enabled: false
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&4Spider Jockey"
+    show-name: false
+    health: 20
+
+  skeleton-horseman:
+    enabled: false
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&7Skeleton Horseman"
+    show-name: false
+    health: 30
+
+# Herobrine: encuentro de terror psicológico. No es un boss tradicional - la
+# mayoría de las veces no pasa nada más que verlo brevemente u oír algo raro.
+# Solo entra en combate si un jugador lo ataca primero. Ver DOCUMENTACION.md
+# para el detalle completo de cómo funciona cada mecánica.
+herobrine:
+  enabled: false
+  worlds: [world]
+  # Vacío = cualquier bioma
+  biomes: []
+  y-min: -64
+  y-max: 320
+  # El spawn natural usa un temporizador por jugador, no una tirada de azar cada pocos segundos.
+  # "chance" se conserva solo por compatibilidad con configs antiguas.
+  chance: 2
+  encounter-interval:
+    # Próximo encuentro natural entre 8 y 20 minutos de juego, elegido aleatoriamente.
+    min-seconds: 480
+    max-seconds: 1200
+  # Protección adicional tras un encuentro.
+  cooldown-seconds: 120
+  min-distance-from-player: 10
+  max-distance-from-player: 24
+  # Dos instancias no aparecen a menos de esta distancia entre sí
+  min-distance-between-instances: 32
+  # Qué tipos de encuentro pueden salir (ver DOCUMENTACION.md para la descripción de cada uno)
+  encounters:
+    observe: true
+    flee-on-sight: true
+    behind: true
+    false-chase: true
+    outside-observer: true
+    # Comportamiento inspirado en el Creaking: se congela al mirarlo y se acerca al apartar la vista.
+    # NO requiere que exista un Creaking cerca.
+    watcher: true
+    # Encuentros inspirados en el acecho clásico de Herobrine / From The Fog
+    lurking: true
+    stalking: true
+    creeping: true
+  observation:
+    # Si un jugador lo mira fijo más de esto, desaparece
+    max-look-seconds: 8
+    # % de probabilidad, cuando nadie lo mira, de reubicarse cerca de otro jugador
+    teleport-chance: 20
+    # % de probabilidad, cuando nadie lo mira, de desaparecer del todo
+    vanish-chance: 10
+  # Sistema de acecho. Las distancias siguen la idea de From The Fog, pero la
+  # implementación es nativa de Paper/Purpur y no depende del resource/datapack.
+  stalking:
+    max-lifetime-seconds: 45
+    lurking:
+      min-distance: 50
+      max-distance: 80
+      max-lateral: 50
+    stalking:
+      min-distance: 25
+      max-distance: 46
+      max-lateral: 35
+    creeping:
+      min-distance: 3
+      max-distance: 5
+      max-lateral: 3
+    watcher:
+      move-interval-ticks: 10
+      step-blocks: 0.8
+    sneaky-strike:
+      enabled: true
+      # Solo CREEPING. Si el jugador todavía no lo descubre tras el retraso,
+      # esta probabilidad decide si recibe un único golpe antes de desaparecer.
+      chance: 10
+      delay-seconds: 8
+      damage: 2
+      knockback: 0.7
+  footsteps:
+    sound: minecraft:entity.player.attack.weak
+    volume: 0.6
+    pitch: 0.6
+  stop-message:
+    enabled: true
+    # Extremadamente raro a propósito
+    chance: 0.5
+  redstone-torches:
+    enabled: true
+    # Se intenta colocar en aire sobre un bloque sólido dentro de 4 bloques de Herobrine.
+    # No rompe ni reemplaza terreno.
+    chance: 12
+    cooldown-seconds: 20
+    max-per-instance: 1
+  redstone-on-hit:
+    enabled: true
+    chance: 10
+  # Textura completa del Mannequin (propiedad textures en Base64).
+  # Por compatibilidad, si skin-value no existe se lee head-value de configs 1.8.x.
+  skin-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="
+  combat:
+    enabled: true
+    # BossBar de Herobrine: desactivada por defecto.
+    bossbar-enabled: false
+    # Si no muere antes de esto, escapa y termina el combate
+    max-duration-seconds: 35
+    # Bajo esta fracción de vida, empieza a huir
+    flee-health-fraction: 0.20
+    # Al agotarse el combate o bajar de vida, corre visiblemente antes de desaparecer.
+    flee-duration-seconds: 4
+    flee-step-blocks: 1.05
+    # Movimiento y ataque controlados por el plugin (Mannequin no usa IA hostil).
+    chase-step-blocks: 0.55
+    attack-cooldown-ticks: 24
+    knockback: 1.15
+    # Nivel de Speed mientras huye
+    flee-speed-amplifier: 2
+  health: 80
+  # Poco daño directo: el golpe destaca principalmente por el empuje.
+  damage: 2
+  speed: 0.35
+  max-chase-distance: 20
+  reward:
+    xp: 30
+    command:
+      # Desactivado por defecto a propósito - no queremos que sea un mob para farmear
+      enabled: false
+      command: "eco give {player} 100"

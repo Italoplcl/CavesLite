@@ -1,0 +1,51 @@
+# DangerousCaves 1.10.1 - apariencia del panel /dcaves
+# Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
+# Los colores usan el formato legacy de Minecraft (&a, &c, &l, etc.).
+main:
+  title: "&4&lDangerousCaves"
+  description: "&7Criaturas, encuentros y herramientas de administracion"
+  columns: 3
+  button-prefix: "&8[&c◆&8] &f"
+  decorative-item: SCULK_CATALYST
+  herobrine-label: "&fHerobrine"
+
+mob:
+  title-prefix: "&4&l"
+  description: "&7Configuracion, apariencia y prueba del encuentro"
+  icon-width: 48
+  icon-height: 48
+  buttons:
+    save: "&a✔ Guardar"
+    summon: "&e⚡ Invocar"
+    remove: "&c✖ Eliminar"
+  labels:
+    enabled: "&aSpawn natural"
+    name: "&fNombre"
+    show-name: "&fMostrar nombre"
+    priority: "&ePrioridad"
+    bossbar: "&dBossBar"
+    ymin: "&7Altura minima"
+    ymax: "&7Altura maxima"
+    cooldown: "&7Cooldown (segundos)"
+    maxactive: "&7Maximo activo (0 = sin limite)"
+
+icons:
+  alpha-spider: SPIDER_EYE
+  cave-golem: IRON_PICKAXE
+  crying-bat: BAT_SPAWN_EGG
+  dead-miner: PLAYER_HEAD
+  hexed-armor: IRON_CHESTPLATE
+  hungering-darkness: BLACK_DYE
+  lava-creeper: LAVA_BUCKET
+  magma-monster: MAGMA_BLOCK
+  mimic: CHEST
+  smoke-demon: CAMPFIRE
+  tnt-creeper: TNT
+  watcher: ENDER_EYE
+  giant-zombie: ZOMBIE_HEAD
+  chicken-jockey: CHICKEN_SPAWN_EGG
+  killer-bunny: RABBIT_FOOT
+  illusioner: BOW
+  spider-jockey: SKELETON_SKULL
+  skeleton-horseman: SKELETON_HORSE_SPAWN_EGG
+  herobrine: PLAYER_HEAD
