@@ -4,10 +4,10 @@ import dev.caveslite.mobs.CustomMob;
 import dev.caveslite.mobs.MobManager;
 import dev.caveslite.util.Text;
 import io.papermc.paper.registry.data.dialog.DialogBase;
-import io.papermc.paper.registry.data.dialog.DialogBody;
-import io.papermc.paper.registry.data.dialog.DialogInput;
-import io.papermc.paper.registry.data.dialog.DialogType;
-import io.papermc.paper.registry.data.dialog.action.ActionButton;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
 import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
 import io.papermc.paper.dialog.Dialog;
@@ -127,9 +127,9 @@ public final class AdminDialogs {
                 .type(DialogType.multiAction(List.of(
                         button(ui.getString("mob.buttons.save", "&a✔ Guardar"), (view, audience) -> {
                             if (!(audience instanceof Player p)) return;
-                            int newPriority = Math.max(0, Math.round(view.getFloat("priority")));
-                            int newMinY = Math.round(view.getFloat("ymin"));
-                            int newMaxY = Math.round(view.getFloat("ymax"));
+                            int newPriority = Math.max(0, Math.round(orFloat(view.getFloat("priority"), priority)));
+                            int newMinY = Math.round(orFloat(view.getFloat("ymin"), minY));
+                            int newMaxY = Math.round(orFloat(view.getFloat("ymax"), maxY));
                             if (newMinY > newMaxY) { int swap = newMinY; newMinY = newMaxY; newMaxY = swap; }
                             plugin.getConfig().set(path + "enabled", Boolean.TRUE.equals(view.getBoolean("enabled")));
                             plugin.getConfig().set(path + "name", view.getText("name"));
@@ -137,8 +137,8 @@ public final class AdminDialogs {
                             plugin.getConfig().set(path + "priority", newPriority);
                             plugin.getConfig().set(path + "spawn-y-min", newMinY);
                             plugin.getConfig().set(path + "spawn-y-max", newMaxY);
-                            plugin.getConfig().set(path + "cooldown-seconds", Math.max(0, Math.round(view.getFloat("cooldown"))));
-                            plugin.getConfig().set(path + "max-active", Math.max(0, Math.round(view.getFloat("maxactive"))));
+                            plugin.getConfig().set(path + "cooldown-seconds", Math.max(0, Math.round(orFloat(view.getFloat("cooldown"), cooldown))));
+                            plugin.getConfig().set(path + "max-active", Math.max(0, Math.round(orFloat(view.getFloat("maxactive"), maxActive))));
                             boolean newBoss = Boolean.TRUE.equals(view.getBoolean("bossbar"));
                             plugin.getConfig().set("boss-bar.mobs." + id, newBoss);
                             if (newBoss) plugin.getConfig().set("boss-bar.enabled", true);
@@ -184,6 +184,10 @@ public final class AdminDialogs {
 
     private ActionButton button(String label, DialogActionCallback callback) {
         return ActionButton.builder(Text.legacy(label)).action(DialogAction.customClick(callback, ClickCallback.Options.builder().uses(1).build())).build();
+    }
+
+    private float orFloat(Float value, float fallback) {
+        return value == null ? fallback : value.floatValue();
     }
 
     private String pretty(String id) {
