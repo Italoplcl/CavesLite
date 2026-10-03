@@ -14,6 +14,12 @@ public interface CustomMob {
     /** Weight in the spawn pool. 0 disables natural spawning. */
     int weight();
 
+    /** Optional common natural-spawn limits. */
+    default int spawnYMin() { return Integer.MIN_VALUE; }
+    default int spawnYMax() { return Integer.MAX_VALUE; }
+    default int maxActive() { return 0; }
+    default long cooldownMillis() { return 0L; }
+
     /** Vanilla entity this mob is based on. */
     EntityType type();
 
@@ -21,6 +27,14 @@ public interface CustomMob {
 
     default boolean canSpawn(Location loc) {
         return true;
+    }
+
+    /** Whether this mob uses the legacy global mobs.y-min/y-max range. */
+    default boolean usesGlobalYRange() { return true; }
+
+    /** Global natural-spawn context. Legacy mobs default to caves; anomalies may opt into another context. */
+    default boolean naturalContextAllowed(Location loc) {
+        return dev.caveslite.util.Locations.isCave(loc);
     }
 
     LivingEntity spawn(Location loc);

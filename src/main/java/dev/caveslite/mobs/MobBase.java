@@ -23,6 +23,10 @@ public abstract class MobBase implements CustomMob {
     private int weight;
     protected Component name;
     protected Double health;
+    private int spawnYMin = Integer.MIN_VALUE;
+    private int spawnYMax = Integer.MAX_VALUE;
+    private int maxActive;
+    private long cooldownMillis;
 
     protected MobBase(EntityType type, String id, int weight, Double health) {
         this(type, id, weight, health, "&4" + Utils.capitalize(id.replace('-', ' ')));
@@ -47,6 +51,11 @@ public abstract class MobBase implements CustomMob {
         return weight;
     }
 
+    @Override public int spawnYMin() { return spawnYMin; }
+    @Override public int spawnYMax() { return spawnYMax; }
+    @Override public int maxActive() { return maxActive; }
+    @Override public long cooldownMillis() { return cooldownMillis; }
+
     @Override
     public EntityType type() {
         return type;
@@ -60,6 +69,10 @@ public abstract class MobBase implements CustomMob {
     @Override
     public void reload(ConfigurationSection cfg) {
         weight = cfg.getInt("priority", defWeight);
+        spawnYMin = cfg.getInt("spawn-y-min", Integer.MIN_VALUE);
+        spawnYMax = cfg.getInt("spawn-y-max", Integer.MAX_VALUE);
+        maxActive = Math.max(0, cfg.getInt("max-active", 0));
+        cooldownMillis = Math.max(0L, cfg.getLong("cooldown-seconds", 0L)) * 1000L;
 
         String configuredName = cfg.getString("name", defName);
         name = configuredName == null || configuredName.isEmpty() ? null : Text.legacy(configuredName);

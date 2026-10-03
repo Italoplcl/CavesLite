@@ -45,6 +45,7 @@ public final class MobManager implements Listener {
     private final Map<String, CustomMob> mobs = new LinkedHashMap<>();
     private final List<SpawnListener> spawnListeners = new java.util.ArrayList<>();
     private final Map<CustomMob.Ticking, Set<UUID>> tracked = new HashMap<>();
+    private final Map<String, Set<UUID>> activeByMob = new HashMap<>();
     private final WorldFilter worlds = new WorldFilter();
 
     private WeightedPool<CustomMob> pool = new WeightedPool<>();
@@ -55,6 +56,7 @@ public final class MobManager implements Listener {
     private int yMax;
     private int maxLight;
     private boolean blockRename;
+    private final Map<String, Long> lastNaturalSpawn = new HashMap<>();
 
     public MobManager(Plugin plugin) {
         this.plugin = plugin;
@@ -62,6 +64,7 @@ public final class MobManager implements Listener {
 
     public void register(CustomMob mob) {
         mobs.put(mob.id(), mob);
+        activeByMob.put(mob.id(), new HashSet<>());
         if (mob instanceof Listener listener) {
             Bukkit.getPluginManager().registerEvents(listener, plugin);
         }
@@ -116,6 +119,7 @@ public final class MobManager implements Listener {
 
     public LivingEntity spawn(CustomMob mob, Location loc) {
         LivingEntity entity = mob.spawn(loc);
+        activeByMob.get(mob.id()).add(entity.getUniqueId());
         if (mob instanceof CustomMob.Ticking ticking) {
             tracked.get(ticking).add(entity.getUniqueId());
         }
@@ -132,19 +136,31 @@ public final class MobManager implements Listener {
         if (!replaceTypes.contains(event.getEntityType())) return;
 
         Location loc = event.getLocation();
-        if (loc.getBlockY() > yMax || loc.getBlockY() < yMin
-                || !worlds.allows(loc.getWorld())
+        if (!worlds.allows(loc.getWorld())
                 || (maxLight < 16 && loc.getBlock().getLightLevel() > Math.max(0, maxLight))
-                || !Locations.isCave(loc)
                 || !Rng.chance(chance)) {
             return;
         }
 
         CustomMob mob = pool.next();
-        if (!mob.canSpawn(loc)) return;
+        if ((mob.usesGlobalYRange() && (loc.getBlockY() > yMax || loc.getBlockY() < yMin))
+                || loc.getBlockY() < mob.spawnYMin() || loc.getBlockY() > mob.spawnYMax()
+                || !mob.naturalContextAllowed(loc) || !mob.canSpawn(loc)) return;
+        long now = System.currentTimeMillis();
+        if (mob.cooldownMillis() > 0 && now - lastNaturalSpawn.getOrDefault(mob.id(), 0L) < mob.cooldownMillis()) return;
+        if (mob.maxActive() > 0 && countActive(mob.id()) >= mob.maxActive()) return;
 
         event.setCancelled(true);
         spawn(mob, loc);
+        lastNaturalSpawn.put(mob.id(), now);
+    }
+
+
+    private int countActive(String id) {
+        Set<UUID> ids = activeByMob.get(id);
+        if (ids == null) return 0;
+        ids.removeIf(uuid -> { Entity e = Bukkit.getEntity(uuid); return e == null || !e.isValid(); });
+        return ids.size();
     }
 
     // ----------------------------------------------------------------- ticking
@@ -171,6 +187,7 @@ public final class MobManager implements Listener {
         for (Entity entity : event.getEntities()) {
             if (!(entity instanceof LivingEntity living)) continue;
             String id = TagHelper.getTag(living);
+            if (id != null && activeByMob.containsKey(id)) activeByMob.get(id).add(living.getUniqueId());
             if (id != null && mobs.get(id) instanceof CustomMob.Ticking ticking) {
                 tracked.get(ticking).add(living.getUniqueId());
             }

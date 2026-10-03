@@ -27,11 +27,13 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
     private final CavesLite plugin;
     private final MobManager mobs;
     private final Lang lang;
+    private final AdminDialogs dialogs;
 
-    public CavesCommand(CavesLite plugin, MobManager mobs, Lang lang) {
+    public CavesCommand(CavesLite plugin, MobManager mobs, Lang lang, AdminDialogs dialogs) {
         this.plugin = plugin;
         this.mobs = mobs;
         this.lang = lang;
+        this.dialogs = dialogs;
     }
 
     private void send(CommandSender sender, String key, Map<String, String> placeholders) {
@@ -40,6 +42,7 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0 && sender instanceof Player player) { dialogs.showMain(player); return true; }
         String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "list" -> send(sender, "command.list", Map.of("mobs", String.join(", ", mobs.getMobIds())));

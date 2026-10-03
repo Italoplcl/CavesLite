@@ -15,6 +15,12 @@ import dev.caveslite.mobs.defaults.Mimic;
 import dev.caveslite.mobs.defaults.SmokeDemon;
 import dev.caveslite.mobs.defaults.TNTCreeper;
 import dev.caveslite.mobs.defaults.Watcher;
+import dev.caveslite.mobs.defaults.GiantZombie;
+import dev.caveslite.mobs.defaults.ChickenJockeyAnomaly;
+import dev.caveslite.mobs.defaults.KillerBunny;
+import dev.caveslite.mobs.defaults.IllusionerAnomaly;
+import dev.caveslite.mobs.defaults.SpiderJockeyAnomaly;
+import dev.caveslite.mobs.defaults.SkeletonHorsemanAnomaly;
 import dev.caveslite.util.Utils;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;
@@ -63,6 +69,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
     private KillLeaderboard leaderboard;
     private HerobrineEncounter herobrine;
     private Mimic mimic;
+    private AdminDialogs adminDialogs;
 
     @Override
     public void onEnable() {
@@ -84,6 +91,12 @@ public final class CavesLite extends JavaPlugin implements Listener {
         mobs.register(new LavaCreeper());
         mobs.register(new DeadMiner());
         mobs.register(new SmokeDemon());
+        mobs.register(new GiantZombie());
+        mobs.register(new ChickenJockeyAnomaly());
+        mobs.register(new KillerBunny());
+        mobs.register(new IllusionerAnomaly());
+        mobs.register(new SpiderJockeyAnomaly());
+        mobs.register(new SkeletonHorsemanAnomaly());
 
         ambient = new AmbientSounds(this);
         footsteps = new Footsteps(this);
@@ -96,6 +109,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         achievements = new MobAchievements(this, economy);
         leaderboard = new KillLeaderboard(this);
         herobrine = new HerobrineEncounter(this, lang);
+        adminDialogs = new AdminDialogs(this, mobs);
 
         mobs.addSpawnListener(spawnTitles);
 
@@ -126,7 +140,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
 
         PluginCommand command = getCommand("dangerouscaves");
         if (command != null) {
-            command.setExecutor(new CavesCommand(this, mobs, lang));
+            command.setExecutor(new CavesCommand(this, mobs, lang, adminDialogs));
         }
     }
 

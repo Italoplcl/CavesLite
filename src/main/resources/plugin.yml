@@ -13,7 +13,7 @@ commands:
   dangerouscaves:
     aliases: [dcaves]
     description: Manage Dangerous Caves mobs
-    usage: /<command> <list|summon|kill|reload>
+    usage: /<command> [list|summon|kill|reload]
     permission: dangerouscaves.command
 permissions:
   dangerouscaves.command:

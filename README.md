@@ -71,7 +71,7 @@ compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log de
   segun el componente; revisa sus repositorios para el detalle).
 - Ver `LICENSE` para el texto completo de la licencia MIT y el aviso de los cambios de este port.
 
-## 1.9.2 — defaults seguros y Mimic
+## 1.10.0 — defaults seguros y Mimic
 
 - Los 12 mobs clásicos vienen con `priority: 0`: no aparecen naturalmente hasta que el administrador los habilite.
 - Herobrine viene con `enabled: false`.

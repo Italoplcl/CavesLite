@@ -148,6 +148,12 @@ boss-bar:
     smoke-demon: false
     tnt-creeper: false
     watcher: false
+    giant-zombie: false
+    chicken-jockey: false
+    killer-bunny: false
+    illusioner: false
+    spider-jockey: false
+    skeleton-horseman: false
 
 # Dramatic title/subtitle flash to nearby players when an enabled mob spawns.
 spawn-titles:
@@ -505,6 +511,63 @@ mobs:
       - EMERALD_ORE
     # Chance of spawning from block (only variants above)
     spawn-from-block: 0.5
+
+  # --- Nuevos encuentros 1.10 ---
+  # Todos permanecen desactivados hasta que un administrador los habilite.
+  giant-zombie:
+    priority: 0
+    spawn-y-min: 80
+    spawn-y-max: 320
+    cooldown-seconds: 600
+    max-active: 1
+    name: "&4Giant Zombie"
+    health: 80
+
+  chicken-jockey:
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&cChicken Jockey"
+    health: 16
+    speed-amplifier: 3
+
+  killer-bunny:
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&4The Killer Bunny"
+    health: 12
+
+  illusioner:
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&5Illusioner"
+    health: 32
+
+  spider-jockey:
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&4Spider Jockey"
+    health: 20
+
+  skeleton-horseman:
+    priority: 0
+    spawn-y-min: -64
+    spawn-y-max: 64
+    cooldown-seconds: 300
+    max-active: 1
+    name: "&7Skeleton Horseman"
+    health: 30
 
 # Herobrine: encuentro de terror psicológico. No es un boss tradicional - la
 # mayoría de las veces no pasa nada más que verlo brevemente u oír algo raro.
