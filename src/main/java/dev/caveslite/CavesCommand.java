@@ -22,7 +22,7 @@ import java.util.Map;
 
 /** /dcaves [list|summon|kill|kills|reload] */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
-    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "reload");
+    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "options", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
@@ -46,6 +46,11 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
         String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "list" -> send(sender, "command.list", Map.of("mobs", String.join(", ", mobs.getMobIds())));
+
+            case "options", "option", "opciones" -> {
+                if (sender instanceof Player player) dialogs.showOptions(player);
+                else Text.send(sender, "§cEste panel solo puede abrirlo un jugador.");
+            }
 
             case "reload", "r" -> {
                 plugin.reloadAll();

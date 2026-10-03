@@ -90,6 +90,46 @@ public final class AdminDialogs {
         return body;
     }
 
+
+    /** Global feature switches exposed through /dcaves options. */
+    public void showOptions(Player player) {
+        String ambientPath = plugin.getConfig().isConfigurationSection("caverns.ambient") ? "caverns.ambient.enabled" : "ambient.enabled";
+        String footstepsPath = plugin.getConfig().isConfigurationSection("caverns.ambient") ? "caverns.ambient.footsteps.enabled" : "ambient.footsteps.enabled";
+
+        Dialog dialog = Dialog.create(b -> b.empty()
+                .base(DialogBase.builder(Text.legacy(ui.getString("options.title", "&4&lDangerousCaves &8- &fOpciones")))
+                        .body(List.of(DialogBody.plainMessage(Text.legacy(ui.getString("options.description", "&7Activa o desactiva los sistemas globales del plugin.")))))
+                        .inputs(List.of(
+                                DialogInput.bool("ambient", Text.legacy(ui.getString("options.labels.ambient", "&bSonidos ambientales")), plugin.getConfig().getBoolean(ambientPath, true), "true", "false"),
+                                DialogInput.bool("footsteps", Text.legacy(ui.getString("options.labels.footsteps", "&bPasos fantasma")), plugin.getConfig().getBoolean(footstepsPath, true), "true", "false"),
+                                DialogInput.bool("tension", Text.legacy(ui.getString("options.labels.tension", "&cTension / latidos")), plugin.getConfig().getBoolean("tension.enabled", true), "true", "false"),
+                                DialogInput.bool("bossbar", Text.legacy(ui.getString("options.labels.bossbar", "&dBossBars")), plugin.getConfig().getBoolean("boss-bar.enabled", false), "true", "false"),
+                                DialogInput.bool("spawntitles", Text.legacy(ui.getString("options.labels.spawn-titles", "&eTitulos de aparicion")), plugin.getConfig().getBoolean("spawn-titles.enabled", true), "true", "false"),
+                                DialogInput.bool("warnings", Text.legacy(ui.getString("options.labels.warnings", "&6Avisos ActionBar")), plugin.getConfig().getBoolean("warnings.enabled", true), "true", "false"),
+                                DialogInput.bool("trails", Text.legacy(ui.getString("options.labels.trails", "&aTrails / particulas")), plugin.getConfig().getBoolean("trails.enabled", true), "true", "false"),
+                                DialogInput.bool("achievements", Text.legacy(ui.getString("options.labels.achievements", "&6Achievements")), plugin.getConfig().getBoolean("achievements.enabled", true), "true", "false"),
+                                DialogInput.bool("leaderboards", Text.legacy(ui.getString("options.labels.leaderboards", "&eLeaderboards")), plugin.getConfig().getBoolean("leaderboards.enabled", true), "true", "false")
+                        )).build())
+                .type(DialogType.multiAction(List.of(
+                        button(ui.getString("options.buttons.save", "&a✔ Guardar"), (view, audience) -> {
+                            if (!(audience instanceof Player p)) return;
+                            plugin.getConfig().set(ambientPath, Boolean.TRUE.equals(view.getBoolean("ambient")));
+                            plugin.getConfig().set(footstepsPath, Boolean.TRUE.equals(view.getBoolean("footsteps")));
+                            plugin.getConfig().set("tension.enabled", Boolean.TRUE.equals(view.getBoolean("tension")));
+                            plugin.getConfig().set("boss-bar.enabled", Boolean.TRUE.equals(view.getBoolean("bossbar")));
+                            plugin.getConfig().set("spawn-titles.enabled", Boolean.TRUE.equals(view.getBoolean("spawntitles")));
+                            plugin.getConfig().set("warnings.enabled", Boolean.TRUE.equals(view.getBoolean("warnings")));
+                            plugin.getConfig().set("trails.enabled", Boolean.TRUE.equals(view.getBoolean("trails")));
+                            plugin.getConfig().set("achievements.enabled", Boolean.TRUE.equals(view.getBoolean("achievements")));
+                            plugin.getConfig().set("leaderboards.enabled", Boolean.TRUE.equals(view.getBoolean("leaderboards")));
+                            plugin.saveConfig();
+                            plugin.reloadAll();
+                            p.sendMessage(Text.legacy(ui.getString("options.saved", "&aOpciones globales actualizadas.")));
+                        })
+                )).columns(1).build()));
+        player.showDialog(dialog);
+    }
+
     private void showMob(Player player, String id) {
         CustomMob mob = mobs.getMob(id);
         if (mob == null) return;

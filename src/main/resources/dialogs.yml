@@ -49,3 +49,23 @@ icons:
   spider-jockey: SKELETON_SKULL
   skeleton-horseman: SKELETON_HORSE_SPAWN_EGG
   herobrine: PLAYER_HEAD
+
+
+# Panel global: /dcaves options
+# Solo contiene sistemas que existen realmente en el plugin.
+options:
+  title: "&4&lDangerousCaves &8- &fOpciones"
+  description: "&7Activa o desactiva los sistemas globales del plugin."
+  saved: "&aOpciones globales actualizadas."
+  labels:
+    ambient: "&bSonidos ambientales"
+    footsteps: "&bPasos fantasma"
+    tension: "&cTension / latidos"
+    bossbar: "&dBossBars"
+    spawn-titles: "&eTitulos de aparicion"
+    warnings: "&6Avisos ActionBar"
+    trails: "&aTrails / particulas"
+    achievements: "&6Achievements"
+    leaderboards: "&eLeaderboards"
+  buttons:
+    save: "&a✔ Guardar"

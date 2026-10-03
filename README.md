@@ -88,3 +88,6 @@ compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log de
 - Encuentros compuestos usan la configuracion comun de nombre/salud.
 - `/dcaves kill` valida IDs registrados del plugin antes de eliminar entidades.
 - Mimic: limite activo reforzado y limpieza optimizada mediante PDC por chunk.
+
+### Global options
+`/dcaves options` opens the native Dialog for global feature switches: ambient sounds, ghost footsteps, tension/heartbeat, BossBars, spawn titles, ActionBar warnings, trails/particles, achievements and leaderboards. Labels and colours are editable in `dialogs.yml`.
