@@ -62,6 +62,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
     private MobAchievements achievements;
     private KillLeaderboard leaderboard;
     private HerobrineEncounter herobrine;
+    private Mimic mimic;
 
     @Override
     public void onEnable() {
@@ -70,7 +71,8 @@ public final class CavesLite extends JavaPlugin implements Listener {
         lang = new Lang(this);
 
         mobs = new MobManager(this);
-        mobs.register(new Mimic(mobs));
+        mimic = new Mimic(mobs);
+        mobs.register(mimic);
         mobs.register(new CaveGolem(mobs));
         mobs.register(new AlphaSpider());
         mobs.register(new HexedArmor());
@@ -111,6 +113,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         reloadAll();
 
         getServer().getScheduler().runTaskTimer(this, mobs::tick, MOB_TICK, MOB_TICK);
+        getServer().getScheduler().runTaskTimer(this, mimic::cleanupExpiredChests, 400L, 400L);
         getServer().getScheduler().runTaskTimer(this, ambient::tick, AMBIENT_TICK, AMBIENT_TICK);
         getServer().getScheduler().runTaskTimer(this, footsteps::tick, FOOTSTEPS_TICK, FOOTSTEPS_TICK);
         getServer().getScheduler().runTaskTimer(this, tension::tick, TENSION_TICK, TENSION_TICK);
@@ -157,6 +160,10 @@ public final class CavesLite extends JavaPlugin implements Listener {
         }
         if (herobrine != null) {
             herobrine.removeAll();
+        }
+        if (mobs != null) {
+            mobs.killAll(entity -> true);
+            mobs.cleanupArtifacts(null);
         }
     }
 

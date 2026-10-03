@@ -31,4 +31,9 @@ public interface CustomMob {
     interface Ticking extends CustomMob {
         void tick(LivingEntity entity);
     }
+
+    /** A mob that can leave temporary world artifacts that must be cleaned explicitly. */
+    interface Cleanup extends CustomMob {
+        int cleanupArtifacts();
+    }
 }

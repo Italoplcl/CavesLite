@@ -206,6 +206,20 @@ public final class MobManager implements Listener {
         return count[0];
     }
 
+    /** Removes temporary blocks/artifacts created by custom mobs. */
+    public int cleanupArtifacts(String mobId) {
+        int removed = 0;
+        if (mobId == null) {
+            for (CustomMob mob : mobs.values()) {
+                if (mob instanceof CustomMob.Cleanup cleanup) removed += cleanup.cleanupArtifacts();
+            }
+        } else {
+            CustomMob mob = mobs.get(mobId);
+            if (mob instanceof CustomMob.Cleanup cleanup) removed += cleanup.cleanupArtifacts();
+        }
+        return removed;
+    }
+
     public Plugin getPlugin() {
         return plugin;
     }

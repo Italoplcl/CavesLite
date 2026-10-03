@@ -323,3 +323,28 @@ Se agregaron tres encuentros inspirados en la mecánica de observación de From 
 - **CREEPING:** aparece muy cerca (3-5 bloques), normalmente detrás del jugador. Puede ejecutar un único Sneaky Strike si no es descubierto.
 
 Los tres encuentros buscan suelo válido alrededor de la altura del jugador, no fuerzan la carga de chunks y desaparecen al superar `stalking.max-lifetime-seconds`. La detección requiere dirección de mirada y línea de visión real. Todas las distancias, duración y parámetros del Sneaky Strike se pueden ajustar en `herobrine.stalking` dentro de `config.yml`.
+
+---
+
+## Cambios de administración desde 1.9.2
+
+### Estado inicial de mobs
+Todos los mobs clásicos incluidos en el plugin se distribuyen con `priority: 0`. Esto significa que no participan en el reemplazo de spawns naturales hasta que el administrador asigne un peso mayor que cero. Herobrine usa su propio interruptor y se distribuye con `herobrine.enabled: false`.
+
+El comando `/dcaves summon <mob>` es independiente del peso natural y puede utilizarse para pruebas aunque el mob tenga `priority: 0`.
+
+### BossBars
+`boss-bar.enabled` viene en `false` y cada entrada bajo `boss-bar.mobs` también viene en `false`. Herobrine tiene además `herobrine.combat.bossbar-enabled: false`. Por tanto, una instalación nueva no muestra BossBars de mobs hasta que el administrador las active explícitamente.
+
+### Mimic
+El Mimic conserva su mecánica de disfrazarse como cofre, pero el cofre pasa a tratarse como un artefacto temporal administrado por el plugin.
+
+- `min-distance-from-chest`: radio mínimo respecto de cualquier cofre existente. Valor inicial: `16` bloques.
+- `max-active-chests`: máximo de cofres Mimic simultáneos por mundo. Valor inicial: `1`.
+- `lifetime-seconds`: tiempo máximo que puede permanecer un cofre Mimic sin ser descubierto. Valor inicial: `900` segundos.
+- `remove-on-unload`: elimina el cofre Mimic antes de descargar su chunk. Viene en `true`.
+
+`/dcaves kill` limpia tanto entidades custom como artefactos temporales conocidos, incluidos cofres Mimic cargados. El apagado normal del plugin ejecuta la misma limpieza. El plugin sólo elimina cofres que llevan su etiqueta persistente de Mimic; no elimina cofres normales de jugadores.
+
+### Actualizaciones desde configuraciones anteriores
+`saveDefaultConfig()` no sobrescribe valores existentes. Si se actualiza una instalación anterior, sus prioridades/BossBars anteriores se conservan. Para comprobar exactamente los defaults de 1.9.2 en un servidor de pruebas, respalda y regenera `config.yml`.

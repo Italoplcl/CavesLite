@@ -70,3 +70,13 @@ compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log de
   https://github.com/PaperMC/Paper y https://github.com/PurpurMC/Purpur (ambos MIT / GPL
   segun el componente; revisa sus repositorios para el detalle).
 - Ver `LICENSE` para el texto completo de la licencia MIT y el aviso de los cambios de este port.
+
+## 1.9.2 — defaults seguros y Mimic
+
+- Los 12 mobs clásicos vienen con `priority: 0`: no aparecen naturalmente hasta que el administrador los habilite.
+- Herobrine viene con `enabled: false`.
+- Las BossBars globales y la BossBar de combate de Herobrine vienen desactivadas.
+- `/dcaves summon <mob>` sigue disponible para probar mobs aunque su prioridad natural sea `0`.
+- Mimic evita crear cofres cerca de otros cofres, limita los cofres Mimic activos, tiene tiempo de vida y sus cofres temporales se limpian con `/dcaves kill`, descarga de chunk y apagado normal del plugin.
+
+> Al probar esta versión sobre una instalación anterior, usa un `config.yml` nuevo si quieres verificar los nuevos valores por defecto; Bukkit no reemplaza automáticamente las opciones ya existentes del administrador.

@@ -128,6 +128,7 @@ public final class HerobrineEncounter implements Listener {
     private double redstoneOnHitChance;
     private String skinValue;
     private boolean combatEnabled;
+    private boolean combatBossBarEnabled;
     private long combatMaxDurationTicks;
     private double fleeHealthFraction;
     private int fleeSpeedAmplifier;
@@ -246,6 +247,7 @@ public final class HerobrineEncounter implements Listener {
 
         ConfigurationSection combat = cfg.getConfigurationSection("combat");
         combatEnabled = combat == null || combat.getBoolean("enabled", true);
+        combatBossBarEnabled = combat != null && combat.getBoolean("bossbar-enabled", false);
         combatMaxDurationTicks = Math.max(1, combat != null ? combat.getLong("max-duration-seconds", 60) : 60) * 20L;
         fleeHealthFraction = combat != null ? combat.getDouble("flee-health-fraction", 0.35) : 0.35;
         fleeSpeedAmplifier = combat != null ? combat.getInt("flee-speed-amplifier", 2) : 2;
@@ -805,11 +807,13 @@ public final class HerobrineEncounter implements Listener {
         entity.setCustomNameVisible(false);
         if (entity instanceof Mannequin mannequin) mannequin.setImmovable(false);
 
-        BossBar bar = BossBar.bossBar(Text.legacy(lang.get("herobrine.bossbar-name")), 1f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
-        instance.bossBar().set(bar);
-        for (Player player : entity.getWorld().getPlayers()) {
-            if (player.getLocation().distanceSquared(entity.getLocation()) <= 40 * 40) {
-                player.showBossBar(bar);
+        if (combatBossBarEnabled) {
+            BossBar bar = BossBar.bossBar(Text.legacy(lang.get("herobrine.bossbar-name")), 1f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
+            instance.bossBar().set(bar);
+            for (Player player : entity.getWorld().getPlayers()) {
+                if (player.getLocation().distanceSquared(entity.getLocation()) <= 40 * 40) {
+                    player.showBossBar(bar);
+                }
             }
         }
     }

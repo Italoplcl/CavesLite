@@ -53,9 +53,17 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
                 int removed;
                 if (args.length < 2) {
                     removed = mobs.killAll(entity -> true);
+                    removed += mobs.cleanupArtifacts(null);
+                    plugin.getHerobrine().removeAll();
                 } else {
                     String type = args[1].toLowerCase(Locale.ROOT);
-                    removed = mobs.killAll(entity -> TagHelper.isTagged(entity, type));
+                    if (type.equals("herobrine")) {
+                        plugin.getHerobrine().removeAll();
+                        removed = 0;
+                    } else {
+                        removed = mobs.killAll(entity -> TagHelper.isTagged(entity, type));
+                        removed += mobs.cleanupArtifacts(type);
+                    }
                 }
                 send(sender, "command.kill-removed", Map.of("amount", String.valueOf(removed)));
             }

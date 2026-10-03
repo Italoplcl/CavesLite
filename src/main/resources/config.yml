@@ -120,7 +120,7 @@ tension:
 
 # Shows a boss bar naming whichever enabled mob is closest to each player.
 boss-bar:
-  enabled: true
+  enabled: false
   worlds:
     - world
   # How far away (in blocks) a mob has to be to show up in the bar
@@ -136,18 +136,18 @@ boss-bar:
   style: PROGRESS
   # Which mobs show up in the bar. false = never shown for that mob.
   mobs:
-    alpha-spider: true
-    cave-golem: true
+    alpha-spider: false
+    cave-golem: false
     crying-bat: false
-    dead-miner: true
-    hexed-armor: true
-    hungering-darkness: true
-    lava-creeper: true
-    magma-monster: true
-    mimic: true
-    smoke-demon: true
-    tnt-creeper: true
-    watcher: true
+    dead-miner: false
+    hexed-armor: false
+    hungering-darkness: false
+    lava-creeper: false
+    magma-monster: false
+    mimic: false
+    smoke-demon: false
+    tnt-creeper: false
+    watcher: false
 
 # Dramatic title/subtitle flash to nearby players when an enabled mob spawns.
 spawn-titles:
@@ -323,7 +323,7 @@ mobs:
   # Alpha Spider
   # Spawns cave-spiders as minions and covers player in cobweb
   alpha-spider:
-    priority: 9
+    priority: 0
     health: 18
     name: "&4Alpha Spider"
     # When spider is damaged
@@ -334,7 +334,7 @@ mobs:
   # Crying Bat
   # Just screams and eventually dies. What a legend
   crying-bat:
-    priority: 9
+    priority: 0
     name: "&4Crying Bat"
     # Every ENTITY tick
     cry-chance: 3.33
@@ -344,7 +344,7 @@ mobs:
   # Dead Miner
   # Places torches when it's too dark and drops some items when damaged
   dead-miner:
-    priority: 10
+    priority: 0
     name: "&4Dead Miner"
     health: 22
     # Get your custom head here https://minecraft-heads.com/
@@ -370,7 +370,7 @@ mobs:
   # Hexed Armor
   # When attacks gives player all its armor
   hexed-armor:
-    priority: 6
+    priority: 0
     name: "&4Hexed Armor"
     health: 20
     # Add binding curse to armor
@@ -381,7 +381,7 @@ mobs:
   # Hungering Darkness
   # Spawns in the dark and kills player if there's no light
   hungering-darkness:
-    priority: 8
+    priority: 0
     name: ""
     # Kill the entity on light?
     remove-on-light: false
@@ -395,7 +395,7 @@ mobs:
   # Lava Creeper
   # When blows up creates a crater with magma, obsidian and lava
   lava-creeper:
-    priority: 6
+    priority: 0
     name: "&4Lava Creeper"
     health: 20
     # When Lava Creeper is damaged. In ticks
@@ -413,7 +413,7 @@ mobs:
   # Magma Monster
   # Leaves a trail of magma on its way
   magma-monster:
-    priority: 4
+    priority: 0
     name: "&4Magma Monster"
     health: 20
     # If monster is extinguished it will receive damage
@@ -428,7 +428,7 @@ mobs:
   # Smoke Demon
   # Creates a smoke and gives wither effect
   smoke-demon:
-    priority: 7
+    priority: 0
     name: ""
     health: 20
     # Radius in blocks
@@ -439,7 +439,7 @@ mobs:
   # TNT Creeper
   # Spawns additional TNTs when explodes and creates small explosion when damaged
   tnt-creeper:
-    priority: 9
+    priority: 0
     name: "&4TNT Creeper"
     health: 20
     # Amount of TNT to spawn after explosion
@@ -450,7 +450,7 @@ mobs:
   # Watcher
   # Just jumpscares a player
   watcher:
-    priority: 7
+    priority: 0
     name: "&4Watcher"
     health: 20
     # Get your custom head here https://minecraft-heads.com/
@@ -463,6 +463,14 @@ mobs:
     priority: 0
     name: "&4Mimic"
     health: 30
+    # No crea un cofre Mimic si ya existe cualquier cofre dentro de este radio.
+    min-distance-from-chest: 16
+    # Máximo de cofres Mimic activos simultáneamente por mundo.
+    max-active-chests: 1
+    # Un cofre Mimic sin descubrir desaparece después de este tiempo. 0 = sin límite.
+    lifetime-seconds: 900
+    # Recomendado: elimina el cofre Mimic antes de que su chunk se descargue.
+    remove-on-unload: true
     # List of dropped materials after death
     drop-items:
       - BOOK
@@ -476,7 +484,7 @@ mobs:
   # Cave Golem
   # Has strong attack, can be damaged only with pickaxe, drops its head on death
   cave-golem:
-    priority: 3
+    priority: 0
     name: "&4Cave Golem"
     health: 35
     # Give Cave Golem slowness effect
@@ -503,7 +511,7 @@ mobs:
 # Solo entra en combate si un jugador lo ataca primero. Ver DOCUMENTACION.md
 # para el detalle completo de cómo funciona cada mecánica.
 herobrine:
-  enabled: true
+  enabled: false
   worlds: [world]
   # Vacío = cualquier bioma
   biomes: []
@@ -593,6 +601,8 @@ herobrine:
   skin-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="
   combat:
     enabled: true
+    # BossBar de Herobrine: desactivada por defecto.
+    bossbar-enabled: false
     # Si no muere antes de esto, escapa y termina el combate
     max-duration-seconds: 35
     # Bajo esta fracción de vida, empieza a huir
