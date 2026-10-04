@@ -1,21 +1,17 @@
-name: DangerousCaves
+name: CavesLite
 version: '${version}'
 main: dev.caveslite.CavesLite
 api-version: '26.1'
-description: Ambient cave sounds and custom mobs (lite port of Dangerous Caves 2)
-authors: [imDaniX, Evil-Lootlye]
-# Both optional: economy rewards use Vault (works with CMI, EssentialsX, or
-# any other Vault-compatible economy plugin) if present, and placeholders
-# for leaderboards register only if PlaceholderAPI is present. Neither is
-# required for the plugin to work.
+description: Lightweight vanilla-style anomalies, encounters, cave ambience and custom creatures for modern Minecraft.
+author: Italo
 softdepend: [Vault, PlaceholderAPI]
 commands:
-  dangerouscaves:
-    aliases: [dcaves]
-    description: Manage Dangerous Caves mobs
-    usage: /<command> [list|summon|kill|kills|options|reload]
-    permission: dangerouscaves.command
+  clite:
+    aliases: [caveslite]
+    description: Manage CavesLite encounters and options
+    usage: /<command> [list|summon|herobrine|kill|kills|options|debug|reload]
+    permission: caveslite.command
 permissions:
-  dangerouscaves.command:
-    description: Use /dcaves
+  caveslite.command:
+    description: Use CavesLite administration commands
     default: op

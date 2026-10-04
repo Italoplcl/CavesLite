@@ -23,7 +23,7 @@ public final class VaultEconomy {
         this.plugin = plugin;
     }
 
-    /** (Re)looks up the Vault economy provider. Safe to call again, e.g. on /dcaves reload. */
+    /** (Re)looks up the Vault economy provider. Safe to call again, e.g. on /clite reload. */
     public void hook() {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             economy = null;

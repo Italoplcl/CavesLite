@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** /dcaves [list|summon|kill|kills|reload] */
+/** /clite - CavesLite administration. */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
-    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "options", "reload");
+    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "options", "debug", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
@@ -55,6 +55,22 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             case "reload", "r" -> {
                 plugin.reloadAll();
                 send(sender, "command.reload", null);
+            }
+
+            case "debug" -> {
+                if (args.length < 2 || !args[1].equalsIgnoreCase("mobs")) {
+                    Text.send(sender, "§7Uso: /" + label + " debug mobs [mob]");
+                } else {
+                    String filter = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : null;
+                    if (filter != null && mobs.getMob(filter) == null) {
+                        Text.send(sender, "§cMob desconocido: " + filter);
+                    } else {
+                        List<String> lines = mobs.debugMobLines(filter);
+                        Text.send(sender, "§6[CavesLite] §fDebug de mobs cargados");
+                        for (String line : lines) Text.send(sender, "§7" + line);
+                        Text.send(sender, "§8Nota: el comando no fuerza la carga de chunks descargados.");
+                    }
+                }
             }
 
             case "kill" -> {
@@ -172,6 +188,10 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
         List<String> options = new ArrayList<>();
         if (args.length == 1) {
             options.addAll(SUBCOMMANDS);
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
+            options.add("mobs");
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("debug") && args[1].equalsIgnoreCase("mobs")) {
+            options.addAll(mobs.getMobIds());
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("summon") || args[0].equalsIgnoreCase("kill"))) {
             options.addAll(mobs.getMobIds());
             if (args[0].equalsIgnoreCase("summon")) options.add("herobrine");

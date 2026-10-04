@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -159,7 +160,7 @@ public final class MobManager implements Listener {
     private int countActive(String id) {
         Set<UUID> ids = activeByMob.get(id);
         if (ids == null) return 0;
-        ids.removeIf(uuid -> { Entity e = Bukkit.getEntity(uuid); return e == null || !e.isValid(); });
+        ids.removeIf(uuid -> { Entity e = Bukkit.getEntity(uuid); return e != null && !e.isValid(); });
         return ids.size();
     }
 
@@ -192,6 +193,16 @@ public final class MobManager implements Listener {
                 tracked.get(ticking).add(living.getUniqueId());
             }
         }
+    }
+
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onDeath(EntityDeathEvent event) {
+        String id = TagHelper.getTag(event.getEntity());
+        if (id == null) return;
+        Set<UUID> active = activeByMob.get(id);
+        if (active != null) active.remove(event.getEntity().getUniqueId());
+        for (Set<UUID> ids : tracked.values()) ids.remove(event.getEntity().getUniqueId());
     }
 
     // -------------------------------------------------------------------- misc
@@ -236,6 +247,41 @@ public final class MobManager implements Listener {
             if (mob instanceof CustomMob.Cleanup cleanup) removed += cleanup.cleanupArtifacts();
         }
         return removed;
+    }
+
+    /** Snapshot used only on explicit admin debug requests; no periodic scan. */
+    public List<String> debugMobLines(String filterId) {
+        long now = System.currentTimeMillis();
+        List<String> lines = new java.util.ArrayList<>();
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (String id : mobs.keySet()) counts.put(id, 0);
+        for (World world : Bukkit.getWorlds()) {
+            for (LivingEntity entity : world.getLivingEntities()) {
+                String id = TagHelper.getTag(entity);
+                if (id == null || !mobs.containsKey(id) || (filterId != null && !filterId.equals(id))) continue;
+                counts.put(id, counts.getOrDefault(id, 0) + 1);
+                long born = TagHelper.getSpawnTime(entity);
+                long seconds = born <= 0 ? 0 : Math.max(0, (now - born) / 1000L);
+                String age = String.format("%02dm %02ds", seconds / 60, seconds % 60);
+                Location l = entity.getLocation();
+                lines.add("  #" + counts.get(id) + " - " + age + " - " + world.getName() + " (" + l.getBlockX() + ", " + l.getBlockY() + ", " + l.getBlockZ() + ")");
+            }
+        }
+        List<String> out = new java.util.ArrayList<>();
+        for (String id : mobs.keySet()) {
+            if (filterId != null && !filterId.equals(id)) continue;
+            out.add(id + ": " + counts.getOrDefault(id, 0) + " cargados");
+            int prefixIndex = out.size();
+            // Entity detail lines are appended below in a second scan to keep grouping deterministic.
+            int n = 0;
+            for (World world : Bukkit.getWorlds()) for (LivingEntity entity : world.getLivingEntities()) {
+                if (!id.equals(TagHelper.getTag(entity))) continue;
+                n++; long born = TagHelper.getSpawnTime(entity); long seconds = born <= 0 ? 0 : Math.max(0, (now-born)/1000L);
+                Location l=entity.getLocation();
+                out.add("  #"+n+" - "+String.format("%02dm %02ds",seconds/60,seconds%60)+" - "+world.getName()+" ("+l.getBlockX()+", "+l.getBlockY()+", "+l.getBlockZ()+")");
+            }
+        }
+        return out;
     }
 
     public Plugin getPlugin() {

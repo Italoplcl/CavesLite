@@ -19,7 +19,7 @@ import java.util.logging.Level;
  * from one place.
  *
  * Bundled languages ship inside the jar (resources/lang/*.yml) and are
- * copied to plugins/DangerousCaves/lang/ on first run, same as config.yml,
+ * copied to plugins/CavesLite/lang/ on first run, same as config.yml,
  * so server owners can edit or add their own without recompiling.
  */
 public final class Lang {

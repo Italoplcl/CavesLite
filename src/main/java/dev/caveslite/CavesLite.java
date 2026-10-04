@@ -29,14 +29,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * Lite port of Dangerous Caves 2 (MIT, by imDaniX and Evil-Lootlye):
- * only the ambient cave sounds and the custom mobs.
- */
+/** Main plugin entry point for CavesLite. */
 public final class CavesLite extends JavaPlugin implements Listener {
-    /** Ticks between "entity" updates of ticking mobs (same as the original). */
+    /** Ticks between custom-entity updates. */
     private static final long MOB_TICK = 4L;
-    /** Ticks between ambient sound checks (same as the original PLAYER tick). */
+    /** Ticks between ambient-sound checks. */
     private static final long AMBIENT_TICK = 800L;
     /** Ticks between ghost-footstep checks. */
     private static final long FOOTSTEPS_TICK = 60L;
@@ -116,13 +113,14 @@ public final class CavesLite extends JavaPlugin implements Listener {
         economy.hook();
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new CavesPlaceholders(this, achievements, leaderboard).register();
-            getLogger().info("PlaceholderAPI found - registered %dangerouscaves_*% placeholders.");
+            getLogger().info("PlaceholderAPI found - registered %caveslite_*% placeholders.");
         }
 
         getServer().getPluginManager().registerEvents(mobs, this);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(achievements, this);
         getServer().getPluginManager().registerEvents(leaderboard, this);
+        getServer().getPluginManager().registerEvents(new MobDeathActions(this), this);
         getServer().getPluginManager().registerEvents(herobrine, this);
         reloadAll();
 
@@ -138,7 +136,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         getServer().getScheduler().runTaskTimer(this, herobrine::trySpawns, HEROBRINE_SPAWN_TICK, HEROBRINE_SPAWN_TICK);
         getServer().getScheduler().runTaskTimer(this, herobrine::tick, HEROBRINE_TICK, HEROBRINE_TICK);
 
-        PluginCommand command = getCommand("dangerouscaves");
+        PluginCommand command = getCommand("clite");
         if (command != null) {
             command.setExecutor(new CavesCommand(this, mobs, lang, adminDialogs));
         }
@@ -149,10 +147,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         reloadConfig();
         var config = getConfig();
         lang.reload(config.getString("language", "es"));
-        // The old plugin kept ambient sounds under "caverns.ambient"; this one accepts both layouts.
-        var ambientSection = config.isConfigurationSection("caverns.ambient")
-                ? Utils.section(config, "caverns.ambient")
-                : Utils.section(config, "ambient");
+        var ambientSection = Utils.section(config, "caverns.ambient");
         ambient.reload(ambientSection);
         footsteps.reload(Utils.section(ambientSection, "footsteps"));
         tension.reload(Utils.section(config, "tension"));

@@ -90,7 +90,8 @@ public final class MobBossBar {
             return;
         }
 
-        Component name = Text.legacy(format.replace("{mob}", Utils.capitalize(nearest.mobId().replace('-', ' '))));
+        String visibleName = nearest.entity().getCustomName() != null ? nearest.entity().getCustomName() : Utils.capitalize(nearest.mobId().replace('-', ' '));
+        Component name = Text.legacy(format.replace("{mob}", visibleName));
         float progress = computeProgress(nearest);
 
         BossBar bar = shown.get(player.getUniqueId());

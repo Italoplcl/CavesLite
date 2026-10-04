@@ -75,7 +75,7 @@ import java.util.logging.Level;
 public final class HerobrineEncounter implements Listener {
     public enum EncounterType { OBSERVE, FLEE_ON_SIGHT, BEHIND, FALSE_CHASE, OUTSIDE_OBSERVER, WATCHER, LURKING, STALKING, CREEPING }
 
-    private static final NamespacedKey MARKER = new NamespacedKey("dangerouscaves", "herobrine-marker");
+    private static final NamespacedKey MARKER = new NamespacedKey("caveslite", "herobrine-marker");
     private static final Set<Material> PROTECTED_NEARBY = EnumSet.of(
             Material.VAULT, Material.TRIAL_SPAWNER,
             Material.SCULK_CATALYST, Material.REINFORCED_DEEPSLATE
@@ -109,7 +109,6 @@ public final class HerobrineEncounter implements Listener {
     private boolean enabled;
     private List<Biome> biomes = List.of();
     private int yMin, yMax;
-    private double chance;
     private long cooldownTicks;
     private long intervalMinTicks, intervalMaxTicks;
     private double minDistance, maxDistance, minDistanceBetween;
@@ -158,7 +157,6 @@ public final class HerobrineEncounter implements Listener {
         worlds.reload(cfg.getStringList("worlds"));
         yMin = cfg.getInt("y-min", -64);
         yMax = cfg.getInt("y-max", 320);
-        chance = cfg.getDouble("chance", 2) / 100;
         cooldownTicks = Math.max(1, cfg.getLong("cooldown-seconds", 600)) * 20L;
         ConfigurationSection interval = cfg.getConfigurationSection("encounter-interval");
         intervalMinTicks = Math.max(30, interval != null ? interval.getLong("min-seconds", 480) : 480) * 20L;
@@ -189,8 +187,7 @@ public final class HerobrineEncounter implements Listener {
             if (encountersCfg.getBoolean("behind", true)) enabledEncounters.add(EncounterType.BEHIND);
             if (encountersCfg.getBoolean("false-chase", true)) enabledEncounters.add(EncounterType.FALSE_CHASE);
             if (encountersCfg.getBoolean("outside-observer", true)) enabledEncounters.add(EncounterType.OUTSIDE_OBSERVER);
-            // Backwards compatible: old "creaking" key now means WATCHER behaviour; it never requires a Creaking mob.
-            if (encountersCfg.getBoolean("watcher", encountersCfg.getBoolean("creaking", true))) enabledEncounters.add(EncounterType.WATCHER);
+            if (encountersCfg.getBoolean("watcher", true)) enabledEncounters.add(EncounterType.WATCHER);
             if (encountersCfg.getBoolean("lurking", true)) enabledEncounters.add(EncounterType.LURKING);
             if (encountersCfg.getBoolean("stalking", true)) enabledEncounters.add(EncounterType.STALKING);
             if (encountersCfg.getBoolean("creeping", true)) enabledEncounters.add(EncounterType.CREEPING);
@@ -242,8 +239,8 @@ public final class HerobrineEncounter implements Listener {
         redstoneOnHitEnabled = onHit == null || onHit.getBoolean("enabled", true);
         redstoneOnHitChance = (onHit != null ? onHit.getDouble("chance", 10) : 10) / 100;
 
-        skinValue = cfg.getString("skin-value", cfg.getString("head-value",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="));
+        skinValue = cfg.getString("skin-value",
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0=");
 
         ConfigurationSection combat = cfg.getConfigurationSection("combat");
         combatEnabled = combat == null || combat.getBoolean("enabled", true);
@@ -508,7 +505,7 @@ public final class HerobrineEncounter implements Listener {
             try {
                 ResolvableProfile profile = ResolvableProfile.resolvableProfile()
                         .name("Herobrine")
-                        .uuid(UUID.nameUUIDFromBytes(("DangerousCavesLite:Herobrine:" + skinValue.hashCode()).getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                        .uuid(UUID.nameUUIDFromBytes(("CavesLite:Herobrine:" + skinValue.hashCode()).getBytes(java.nio.charset.StandardCharsets.UTF_8)))
                         .addProperty(new ProfileProperty("textures", skinValue))
                         .build();
                 entity.setProfile(profile);
@@ -688,7 +685,7 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private Player nearestWatcher(LivingEntity entity) {
-        // LURKING can intentionally be much farther away than the old 20-block observer check.
+        // LURKING can intentionally be much farther away than the normal observer range.
         // Iterating world players avoids a large nearby-entity cube scan and still keeps this cheap.
         double maxDetection = Math.max(100.0, lurkingMaxDistance + lurkingLateral);
         double maxDetectionSq = maxDetection * maxDetection;

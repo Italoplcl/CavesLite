@@ -1,8 +1,6 @@
-# DangerousCaves (Lite): sonidos ambientales + mobs personalizados.
-# Basado en Dangerous Caves 2 (MIT, imDaniX / Evil-Lootlye).
-# Los nombres de las opciones son los mismos que en la config original,
-# asi que tu config.yml antigua sigue funcionando (las secciones que ya
-# no existen se ignoran).
+# CavesLite 1.12.0 - configuracion principal.
+# Todas las criaturas y encuentros especiales vienen desactivados por defecto.
+# Activalos explicitamente desde /clite o editando este archivo.
 
 # Idioma de todos los mensajes del plugin (comandos, Herobrine, etc.).
 # Corresponde a un archivo en la carpeta lang/ (es.yml y en.yml vienen
@@ -255,7 +253,7 @@ achievements:
       reward: 300
 
 # "Who's killed the most custom mobs" leaderboards, for PlaceholderAPI
-# (%dangerouscaves_top_kills_1_name%, etc. - see CavesPlaceholders.java for
+# (%caveslite_top_kills_1_name%, etc. - see CavesPlaceholders.java for
 # the full list). A kill always updates the count immediately, but the
 # sorted ranking and its own save file (leaderboards.yml) only refresh
 # periodically - see "update-interval-ticks" - so this never saves to disk
@@ -319,12 +317,10 @@ mobs:
 
   # List of *default* custom mobs
 
-  # To disable mob's name just leave it blank, like
-  #   name: ""
-  # Larger priority - larger chance to spawn in comparison with others.
-  # Set priority to 0 to disable mob, like
-  #   priority: 0
-  # Spawn chance formula - (mob_priority)/(total_priority)
+  # enabled controla si el encuentro participa en spawns naturales.
+  # priority controla su peso relativo entre los encuentros habilitados.
+  # Un mob deshabilitado no participa aunque conserve una prioridad mayor que 0.
+  # show-name controla si su nombre configurado se muestra sobre la entidad.
 
   # Alpha Spider
   # Spawns cave-spiders as minions and covers player in cobweb
@@ -334,6 +330,11 @@ mobs:
     health: 18
     name: "&4Alpha Spider"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     # When spider is damaged
     cobweb-chance: 14.29
     # When spider is damaged
@@ -346,6 +347,11 @@ mobs:
     priority: 0
     name: "&4Crying Bat"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     # Every ENTITY tick
     cry-chance: 3.33
     # Every ENTITY tick if cry was successful
@@ -358,6 +364,11 @@ mobs:
     priority: 0
     name: "&4Dead Miner"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 22
     # Get your custom head here https://minecraft-heads.com/
     # Just copy a "Value" (with =)
@@ -386,6 +397,11 @@ mobs:
     priority: 0
     name: "&4Hexed Armor"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # Add binding curse to armor
     binding-curse: true
@@ -399,6 +415,11 @@ mobs:
     priority: 0
     name: ""
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     # Kill the entity on light?
     remove-on-light: false
     # Play death sound on light?
@@ -415,6 +436,11 @@ mobs:
     priority: 0
     name: "&4Lava Creeper"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # When Lava Creeper is damaged. In ticks
     fire-touch: 10
@@ -435,6 +461,11 @@ mobs:
     priority: 0
     name: "&4Magma Monster"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # If monster is extinguished it will receive damage
     extinguished-damage: false
@@ -452,6 +483,11 @@ mobs:
     priority: 0
     name: ""
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # Radius in blocks
     harm-radius: 3
@@ -465,6 +501,11 @@ mobs:
     priority: 0
     name: "&4TNT Creeper"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # Amount of TNT to spawn after explosion
     tnt-amount: 2
@@ -478,6 +519,11 @@ mobs:
     priority: 0
     name: "&4Watcher"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
     # Get your custom head here https://minecraft-heads.com/
     # Just copy a "Value" (with =)
@@ -492,6 +538,11 @@ mobs:
     max-active: 1
     name: "&4Mimic"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 30
     # No crea un cofre Mimic si ya existe cualquier cofre dentro de este radio.
     min-distance-from-chest: 16
@@ -518,6 +569,11 @@ mobs:
     priority: 0
     name: "&4Cave Golem"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 35
     # Give Cave Golem slowness effect
     slowness: true
@@ -538,8 +594,7 @@ mobs:
     # Chance of spawning from block (only variants above)
     spawn-from-block: 0.5
 
-  # --- Nuevos encuentros 1.10 ---
-  # Todos permanecen desactivados hasta que un administrador los habilite.
+  # Encuentros vanilla anómalos. Todos permanecen desactivados hasta que un administrador los habilite.
   giant-zombie:
     enabled: false
     priority: 0
@@ -549,6 +604,11 @@ mobs:
     max-active: 1
     name: "&4Giant Zombie"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 80
 
   chicken-jockey:
@@ -560,6 +620,11 @@ mobs:
     max-active: 1
     name: "&cChicken Jockey"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 16
     speed-amplifier: 3
 
@@ -572,6 +637,11 @@ mobs:
     max-active: 1
     name: "&4The Killer Bunny"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 12
 
   illusioner:
@@ -583,6 +653,11 @@ mobs:
     max-active: 1
     name: "&5Illusioner"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 32
 
   spider-jockey:
@@ -594,6 +669,11 @@ mobs:
     max-active: 1
     name: "&4Spider Jockey"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 20
 
   skeleton-horseman:
@@ -605,11 +685,16 @@ mobs:
     max-active: 1
     name: "&7Skeleton Horseman"
     show-name: false
+    # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
+    extra-drops: []
+    death-command:
+      enabled: false
+      command: ""
     health: 30
 
 # Herobrine: encuentro de terror psicológico. No es un boss tradicional - la
 # mayoría de las veces no pasa nada más que verlo brevemente u oír algo raro.
-# Solo entra en combate si un jugador lo ataca primero. Ver DOCUMENTACION.md
+# Solo entra en combate si un jugador lo ataca primero. Ver DOCUMENTATION.md
 # para el detalle completo de cómo funciona cada mecánica.
 herobrine:
   enabled: false
@@ -619,8 +704,6 @@ herobrine:
   y-min: -64
   y-max: 320
   # El spawn natural usa un temporizador por jugador, no una tirada de azar cada pocos segundos.
-  # "chance" se conserva solo por compatibilidad con configs antiguas.
-  chance: 2
   encounter-interval:
     # Próximo encuentro natural entre 8 y 20 minutos de juego, elegido aleatoriamente.
     min-seconds: 480
@@ -631,7 +714,7 @@ herobrine:
   max-distance-from-player: 24
   # Dos instancias no aparecen a menos de esta distancia entre sí
   min-distance-between-instances: 32
-  # Qué tipos de encuentro pueden salir (ver DOCUMENTACION.md para la descripción de cada uno)
+  # Qué tipos de encuentro pueden salir (ver DOCUMENTATION.md para la descripción de cada uno)
   encounters:
     observe: true
     flee-on-sight: true
@@ -698,7 +781,6 @@ herobrine:
     enabled: true
     chance: 10
   # Textura completa del Mannequin (propiedad textures en Base64).
-  # Por compatibilidad, si skin-value no existe se lee head-value de configs 1.8.x.
   skin-value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOThiN2NhM2M3ZDMxNGE2MWFiZWQ4ZmMxOGQ3OTdmYzMwYjZlZmM4NDQ1NDI1YzRlMjUwOTk3ZTUyZTZjYiJ9fX0="
   combat:
     enabled: true

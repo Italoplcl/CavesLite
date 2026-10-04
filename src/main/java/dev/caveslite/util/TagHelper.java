@@ -8,13 +8,11 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-/**
- * Marks entities and blocks as custom mobs. The keys are the same as in the
- * original Dangerous Caves 2, so mobs already in your world keep working.
- */
+/** Marks entities and blocks owned by CavesLite. */
 public final class TagHelper {
-    public static final NamespacedKey MOB_KEY = Objects.requireNonNull(NamespacedKey.fromString("dangerouscaves:mob-type"));
-    public static final String SCOREBOARD_TAG = "dc-mob";
+    public static final NamespacedKey MOB_KEY = Objects.requireNonNull(NamespacedKey.fromString("caveslite:mob-type"));
+    public static final String SCOREBOARD_TAG = "caveslite-mob";
+    public static final NamespacedKey SPAWN_TIME_KEY = Objects.requireNonNull(NamespacedKey.fromString("caveslite:spawn-time"));
 
     private TagHelper() {}
 
@@ -22,6 +20,9 @@ public final class TagHelper {
         entity.getPersistentDataContainer().set(MOB_KEY, PersistentDataType.STRING, tag);
         entity.addScoreboardTag(SCOREBOARD_TAG);
         entity.addScoreboardTag(mobScoreboardTag(tag));
+        if (!entity.getPersistentDataContainer().has(SPAWN_TIME_KEY, PersistentDataType.LONG)) {
+            entity.getPersistentDataContainer().set(SPAWN_TIME_KEY, PersistentDataType.LONG, System.currentTimeMillis());
+        }
     }
 
     public static void setTag(BlockState state, String tag) {
@@ -48,6 +49,11 @@ public final class TagHelper {
 
     public static boolean isTagged(LivingEntity entity, String tag) {
         return tag.equals(getTag(entity));
+    }
+
+    public static long getSpawnTime(LivingEntity entity) {
+        Long value = entity.getPersistentDataContainer().get(SPAWN_TIME_KEY, PersistentDataType.LONG);
+        return value == null ? 0L : value;
     }
 
     public static String mobScoreboardTag(String id) {

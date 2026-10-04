@@ -1,93 +1,75 @@
-# DangerousCaves (Lite) para Purpur 26.3
+# CavesLite
 
-Version reducida de **Dangerous Caves 2** (imDaniX / Evil-Lootlye, licencia MIT),
-adaptada a **Purpur** (fork de Paper) 26.3, con tres funciones nuevas de ambiente.
+CavesLite es un plugin independiente para **Minecraft Java 26.3**, orientado a **Purpur/Paper** y **Java 25**. Amplía la exploración vanilla con encuentros poco comunes, criaturas especiales, Herobrine y ambientación subterránea sin convertir el servidor en un sistema RPG pesado ni depender de un resource pack.
 
-## Que incluye
+El proyecto nació inspirado por *Dangerous Caves 2*, pero CavesLite tiene identidad, arquitectura, administración y mecánicas propias.
 
-- **Sonidos ambientales** en cuevas (`caverns.ambient`), con la probabilidad y el
-  tono escalando segun la profundidad (`caverns.ambient.depth-scaling`).
-- **Pasos fantasma** (`caverns.ambient.footsteps`): un sonido de pasos aparece
-  detras de un jugador solo, bajo tierra. No hay ningun mob real ahi.
-- **Latido de tension** (`tension`): cuando un mob que da miedo (por defecto
-  `watcher`, `hungering-darkness`, `smoke-demon`) esta cerca, suena un latido
-  que se acelera segun la distancia.
-- **Los 12 mobs personalizados**, con su config de aparicion (`mobs.*`):
-  alpha-spider, cave-golem, crying-bat, dead-miner, hexed-armor, hungering-darkness,
-  lava-creeper, magma-monster, mimic, smoke-demon, tnt-creeper, watcher.
+## Características
 
-Se quitaron: derrumbes, envejecimiento de cuevas, hipoxia, generador de estructuras,
-PlaceholderAPI, WorldGuard/GriefPrevention/Lands y bStats.
+- 18 criaturas/encuentros configurables más Herobrine.
+- Todos los encuentros especiales vienen **desactivados por defecto**.
+- Prioridad/peso independiente del estado activado/desactivado.
+- BossBars desactivadas por defecto y configurables por encuentro.
+- Nombre visible editable y activable/desactivable por mob.
+- Mimic con control de proximidad, límite activo, expiración y limpieza persistente.
+- Sonidos ambientales, pasos fantasma y sistema de tensión.
+- Títulos de aparición, avisos ActionBar y trails opcionales.
+- Logros, recompensas Vault y rankings opcionales.
+- PlaceholderAPI opcional con identificador `%caveslite_*%`.
+- Paneles nativos de Dialogs de Minecraft; apariencia editable en `dialogs.yml`.
+- Sin estructuras, derrumbes, vines ni generación de terreno propia.
 
 ## Requisitos
 
-- **Purpur 26.3** (o 26.1+; tambien funciona sobre Paper, ya que Purpur es
-  compatible con su API) y **Java 25**.
-- No es compatible con Folia.
+- Purpur/Paper 26.3.
+- Java 25.
+- Vault y PlaceholderAPI son opcionales.
+- Folia no está soportado actualmente.
 
-## Compilar
+## Instalación
 
-**Opcion facil (GitHub):** sube esta carpeta a un repositorio tuyo. La pestana *Actions*
-compila sola con Purpur API y deja el `.jar` en *Artifacts*. Si falla, el log del paso
-`gradle build` muestra el error exacto.
+1. Compila o descarga `CavesLite-1.12.0.jar`.
+2. Colócalo en `plugins/`.
+3. Inicia el servidor para crear `plugins/CavesLite/`.
+4. Revisa `config.yml`, `dialogs.yml` y `lang/`.
+5. Activa explícitamente sólo los encuentros que quieras utilizar.
 
-**Local:** instala JDK 25 y Gradle 9.1+ y ejecuta `gradle build`. El jar queda en `build/libs/`.
+> **Migración desde builds anteriores:** CavesLite usa nueva identidad de plugin, permisos, placeholders y etiquetas persistentes. Para probar 1.12.0 de forma limpia, retira el JAR anterior y usa una carpeta `plugins/CavesLite/` nueva. Conserva una copia de tu configuración anterior sólo como referencia al trasladar ajustes manualmente.
 
-## Instalar
+## Comandos
 
-1. Borra `Dangerous-Caves-2_2_13.jar` de `plugins/` (este plugin usa el mismo nombre interno
-   `DangerousCaves`, asi que no pueden convivir).
-2. Copia el jar nuevo. Al primer inicio crea `plugins/DangerousCaves/config.yml` si no existe.
-   Si ya tenias config, conservala: los nombres de opciones antiguos son los mismos, y las
-   secciones nuevas (`depth-scaling`, `footsteps`, `tension`) se agregan con sus valores por
-   defecto si no existen en tu config.
-3. Revisa `mobs.worlds` y `caverns.ambient.worlds` (por defecto solo `world`; lista vacia = todos los
-   mundos normales) y `mobs.y-min` (ahora `-64`; antes `4`).
+Comando principal: `/clite`. Único alias: `/caveslite`. Permiso administrativo: `caveslite.command`.
 
-## Comandos (permiso `dangerouscaves.command`, por defecto op)
+- `/clite` — abre el panel principal.
+- `/clite options` — opciones globales mediante checks.
+- `/clite list` — IDs registrados.
+- `/clite summon <mob> [x y z [mundo]]` — invocación manual para pruebas.
+- `/clite summon herobrine [jugador] [tipo]` — prueba de Herobrine.
+- `/clite kill [mob]` — limpia entidades/artefactos propiedad de CavesLite.
+- `/clite kills [jugador]` — contador de eliminaciones.
+- `/clite debug mobs [mob]` — cantidad, tiempo activo y ubicación de mobs cargados.
+- `/clite reload` — recarga configuración, idiomas y Dialogs.
 
-`/dcaves list` · `/dcaves summon <mob> [x y z [mundo]]` · `/dcaves kill [mob]` · `/dcaves reload`
+## Administración
 
-## Cambios respecto al original
+`/clite options` controla mediante checks los módulos globales existentes: sonidos ambientales, footsteps, tensión, BossBars, títulos, warnings, trails, achievements y leaderboards.
 
-- Los mobs siguen usando las mismas etiquetas (`dangerouscaves:mob-type`, `dc-mob-*`): los que
-  ya existen en tu mundo siguen siendo reconocidos.
-- Adaptado a la API nueva: efectos (`SLOWNESS`, `STRENGTH`, `NAUSEA`), atributo `MAX_HEALTH`,
-  `TNT`, sonidos por registro, cabezas con texturas via Paper/Purpur.
-- Opciones que el original leia con otro nombre que el documentado se unificaron con la config:
-  `red-torches` y `block-chances.*`.
-- Cada sonido ambiental usa su propio `volume` / `pitch` de la config.
-- `hexed-armor` ya no puede elegir piezas de armadura "legacy" internas de Material.
-- `mimic` sigue desactivado por defecto (`priority: 0`).
-- Migrado de la API de Paper a la de **Purpur**, para aprovechar sus opciones extra de
-  rendimiento y configuracion (sigue siendo compatible con servidores Paper puros).
+El Dialog principal permite administrar encuentros individuales. `dialogs.yml` controla la presentación visual sin recompilar el plugin.
 
-## Creditos
+## Compilación
 
-- **Dangerous Caves 2** (c) imDaniX y Evil-Lootlye, MIT License. Este proyecto reutiliza
-  su diseño de mobs y sonidos ambientales, reescrito para la API actual.
-- **PaperMC/Paper** y **PurpurMC/Purpur**: API sobre la que corre el plugin. Ver
-  https://github.com/PaperMC/Paper y https://github.com/PurpurMC/Purpur (ambos MIT / GPL
-  segun el componente; revisa sus repositorios para el detalle).
-- Ver `LICENSE` para el texto completo de la licencia MIT y el aviso de los cambios de este port.
+El proyecto incluye GitHub Actions. También puede compilarse con JDK 25 y Gradle usando:
 
-## 1.10.0 — defaults seguros y Mimic
+```bash
+gradle build --no-daemon
+```
 
-- Los 12 mobs clásicos vienen con `priority: 0`: no aparecen naturalmente hasta que el administrador los habilite.
-- Herobrine viene con `enabled: false`.
-- Las BossBars globales y la BossBar de combate de Herobrine vienen desactivadas.
-- `/dcaves summon <mob>` sigue disponible para probar mobs aunque su prioridad natural sea `0`.
-- Mimic evita crear cofres cerca de otros cofres, limita los cofres Mimic activos, tiene tiempo de vida y sus cofres temporales se limpian con `/dcaves kill`, descarga de chunk y apagado normal del plugin.
+El JAR se genera en `build/libs/` con nombre `CavesLite-1.12.0.jar`.
 
-> Al probar esta versión sobre una instalación anterior, usa un `config.yml` nuevo si quieres verificar los nuevos valores por defecto; Bukkit no reemplaza automáticamente las opciones ya existentes del administrador.
+## Documentación
 
-## 1.10.1
-- `enabled` real e independiente de `priority` para cada mob; todos OFF por defecto.
-- Dialog principal cacheado y apariencia editable desde `dialogs.yml`.
-- Nombre y visibilidad del nombre configurables por mob desde Dialog.
-- Encuentros compuestos usan la configuracion comun de nombre/salud.
-- `/dcaves kill` valida IDs registrados del plugin antes de eliminar entidades.
-- Mimic: limite activo reforzado y limpieza optimizada mediante PDC por chunk.
+La referencia completa está en [`DOCUMENTATION.md`](DOCUMENTATION.md). La pauta vigente de validación está en [`TESTING.md`](TESTING.md).
 
-### Global options
-`/dcaves options` opens the native Dialog for global feature switches: ambient sounds, ghost footsteps, tension/heartbeat, BossBars, spawn titles, ActionBar warnings, trails/particles, achievements and leaderboards. Labels and colours are editable in `dialogs.yml`.
+## Origen y licencia
+
+CavesLite comenzó como una reimplementación inspirada en **Dangerous Caves 2**, de imDaniX / Evil-Lootlye. Parte del diseño histórico heredado está cubierto por la licencia MIT incluida en `LICENSE`. El proyecto actual ha evolucionado como plugin independiente. Consulta `LICENSE` para los avisos correspondientes.

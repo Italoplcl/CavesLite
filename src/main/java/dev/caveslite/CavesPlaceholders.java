@@ -9,14 +9,14 @@ import java.util.Locale;
  * Placeholders for leaderboard/top plugins. Only registered if
  * PlaceholderAPI is actually installed (see CavesLite.onEnable).
  *
- * %dangerouscaves_kills% - total custom mob kills
- * %dangerouscaves_kills_<mob>% - kills of one specific mob (0 if that mob isn't tracked in config)
- * %dangerouscaves_next_threshold% - kills needed for the next achievement, or "-" if maxed
- * %dangerouscaves_last_achievement% - label of the highest achievement reached, or empty
- * %dangerouscaves_top_kills_<rank>% - total kills of whoever is #<rank> overall
- * %dangerouscaves_top_kills_<rank>_name% - name of whoever is #<rank> overall
- * %dangerouscaves_top_kills_<mob>_<rank>% - kills of whoever is #<rank> for that mob
- * %dangerouscaves_top_kills_<mob>_<rank>_name% - name of whoever is #<rank> for that mob
+ * %caveslite_kills% - total custom mob kills
+ * %caveslite_kills_<mob>% - kills of one specific mob (0 if that mob isn't tracked in config)
+ * %caveslite_next_threshold% - kills needed for the next achievement, or "-" if maxed
+ * %caveslite_last_achievement% - label of the highest achievement reached, or empty
+ * %caveslite_top_kills_<rank>% - total kills of whoever is #<rank> overall
+ * %caveslite_top_kills_<rank>_name% - name of whoever is #<rank> overall
+ * %caveslite_top_kills_<mob>_<rank>% - kills of whoever is #<rank> for that mob
+ * %caveslite_top_kills_<mob>_<rank>_name% - name of whoever is #<rank> for that mob
  */
 public final class CavesPlaceholders extends PlaceholderExpansion {
     private final CavesLite plugin;
@@ -31,7 +31,7 @@ public final class CavesPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "dangerouscaves";
+        return "caveslite";
     }
 
     @Override

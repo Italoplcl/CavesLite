@@ -68,7 +68,8 @@ public final class MobSpawnTitles implements MobManager.SpawnListener {
         long now = entity.getWorld().getFullTime();
 
         Component title = Text.legacy(titleText);
-        Component subtitle = Text.legacy(subtitleText.replace("{mob}", Utils.capitalize(mob.id().replace('-', ' '))));
+        String visibleName = entity.getCustomName() != null ? entity.getCustomName() : Utils.capitalize(mob.id().replace('-', ' '));
+        Component subtitle = Text.legacy(subtitleText.replace("{mob}", visibleName));
         Title displayed = Title.title(title, subtitle, times);
 
         for (Player player : loc.getWorld().getPlayers()) {

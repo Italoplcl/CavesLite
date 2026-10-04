@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.caveslite"
-version = "1.10.3"
+version = "1.12.0"
 
 repositories {
     mavenCentral()
@@ -42,6 +42,6 @@ tasks.processResources {
 }
 
 tasks.jar {
-    archiveBaseName.set("DangerousCavesLite")
+    archiveBaseName.set("CavesLite")
     from("LICENSE")
 }

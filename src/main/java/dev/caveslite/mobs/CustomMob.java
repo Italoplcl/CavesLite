@@ -32,10 +32,10 @@ public interface CustomMob {
         return true;
     }
 
-    /** Whether this mob uses the legacy global mobs.y-min/y-max range. */
+    /** Whether this mob uses the shared global mobs.y-min/y-max range. */
     default boolean usesGlobalYRange() { return true; }
 
-    /** Global natural-spawn context. Legacy mobs default to caves; anomalies may opt into another context. */
+    /** Global natural-spawn context. Standard mobs default to caves; anomalies may opt into another context. */
     default boolean naturalContextAllowed(Location loc) {
         return dev.caveslite.util.Locations.isCave(loc);
     }

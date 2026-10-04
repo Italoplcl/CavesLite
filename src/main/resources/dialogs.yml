@@ -1,11 +1,12 @@
-# DangerousCaves 1.10.1 - apariencia del panel /dcaves
+# CavesLite 1.12.0 - apariencia de los paneles administrativos
 # Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
 # Los colores usan el formato legacy de Minecraft (&a, &c, &l, etc.).
 main:
-  title: "&4&lDangerousCaves"
+  title: "&4&lCavesLite"
   description: "&7Criaturas, encuentros y herramientas de administracion"
   columns: 3
-  button-prefix: "&8[&c◆&8] &f"
+  active-prefix: "&2[&a◆&2] &f"
+  inactive-prefix: "&4[&c◆&4] &f"
   decorative-item: SCULK_CATALYST
   herobrine-label: "&fHerobrine"
 
@@ -22,12 +23,12 @@ mob:
     enabled: "&aSpawn natural"
     name: "&fNombre"
     show-name: "&fMostrar nombre"
-    priority: "&ePrioridad"
+    priority: "&ePrioridad (peso relativo 0-10)"
     bossbar: "&dBossBar"
     ymin: "&7Altura minima"
     ymax: "&7Altura maxima"
-    cooldown: "&7Cooldown (segundos)"
-    maxactive: "&7Maximo activo (0 = sin limite)"
+    cooldown: "&7Cooldown global (segundos)"
+    maxactive: "&7Maximo activo global (0 = sin limite)"
 
 icons:
   alpha-spider: SPIDER_EYE
@@ -51,11 +52,11 @@ icons:
   herobrine: PLAYER_HEAD
 
 
-# Panel global: /dcaves options
+# Panel global: /clite options
 # Solo contiene sistemas que existen realmente en el plugin.
 options:
-  title: "&4&lDangerousCaves &8- &fOpciones"
-  description: "&7Activa o desactiva los sistemas globales del plugin."
+  title: "&4&lCavesLite &8- &fOpciones"
+  description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / DOCUMENTATION.md"
   saved: "&aOpciones globales actualizadas."
   labels:
     ambient: "&bSonidos ambientales"
