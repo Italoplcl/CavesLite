@@ -71,3 +71,11 @@ Luego repetir con los encuentros que realmente se usarán en producción.
 8. `/clite debug mobs` muestra cantidad, edad y ubicación sin cargar chunks adicionales.
 9. Descargar/recargar el chunk de un mob con `max-active: 1`: no debe poder generarse un segundo mientras el primero siga persistente.
 10. `/clite options`: Guardar debe aplicar inmediatamente sin `/clite reload`.
+
+
+## 1.12.1 - correcciones visuales del Dialog principal
+- Con todos los mobs OFF, comprobar que sólo `[◆]` esté rojo y todos los nombres se vean blancos.
+- Activar dos mobs, guardar y reabrir `/clite`: sólo `[◆]` debe pasar a verde; el nombre debe seguir blanco.
+- Confirmar que colores configurados en `name` sigan aplicándose a la entidad/avisos, pero no alteren la lista administrativa principal.
+- Confirmar que la cabecera tenga un solo `SCULK_CATALYST` y no aparezca una segunda línea decorativa desalineada.
+- Confirmar que el control se llame `Peso de seleccion (0-10)`.

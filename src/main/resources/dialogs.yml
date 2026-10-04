@@ -1,12 +1,12 @@
-# CavesLite 1.12.0 - apariencia de los paneles administrativos
+# CavesLite 1.12.1 - apariencia de los paneles administrativos
 # Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
 # Los colores usan el formato legacy de Minecraft (&a, &c, &l, etc.).
 main:
   title: "&4&lCavesLite"
   description: "&7Criaturas, encuentros y herramientas de administracion"
   columns: 3
-  active-prefix: "&2[&a◆&2] &f"
-  inactive-prefix: "&4[&c◆&4] &f"
+  active-prefix: "&a[◆] &f"
+  inactive-prefix: "&c[◆] &f"
   decorative-item: SCULK_CATALYST
   herobrine-label: "&fHerobrine"
 
@@ -23,7 +23,7 @@ mob:
     enabled: "&aSpawn natural"
     name: "&fNombre"
     show-name: "&fMostrar nombre"
-    priority: "&ePrioridad (peso relativo 0-10)"
+    priority: "&ePeso de seleccion (0-10)"
     bossbar: "&dBossBar"
     ymin: "&7Altura minima"
     ymax: "&7Altura maxima"

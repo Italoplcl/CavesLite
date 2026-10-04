@@ -54,15 +54,16 @@ public final class AdminDialogs {
         List<ActionButton> actions = new ArrayList<>();
         for (String id : mobs.getMobIds()) {
             boolean enabled = plugin.getConfig().getBoolean("mobs." + id + ".enabled", false);
-            String status = ui.getString(enabled ? "main.active-prefix" : "main.inactive-prefix", enabled ? "&2[&a◆&2] &f" : "&4[&c◆&4] &f");
-            String name = configuredName(id);
+            String status = ui.getString(enabled ? "main.active-prefix" : "main.inactive-prefix", enabled ? "&a[◆] &f" : "&c[◆] &f");
+            String name = plainConfiguredName(id);
             actions.add(ActionButton.builder(Text.legacy(status + name))
-                    .tooltip(Text.legacy((enabled ? "&aActivo &8- " : "&cInactivo &8- ") + name))
+                    .tooltip(Text.legacy((enabled ? "&aActivo &8- &f" : "&cInactivo &8- &f") + name))
                     .action(DialogAction.customClick((view, audience) -> { if (audience instanceof Player p) showMob(p, id); }, oneUse())).build());
         }
         boolean hEnabled = plugin.getConfig().getBoolean("herobrine.enabled", false);
-        String hPrefix = ui.getString(hEnabled ? "main.active-prefix" : "main.inactive-prefix", hEnabled ? "&2[&a◆&2] &f" : "&4[&c◆&4] &f");
-        actions.add(ActionButton.builder(Text.legacy(hPrefix + ui.getString("main.herobrine-label", "Herobrine")))
+        String hPrefix = ui.getString(hEnabled ? "main.active-prefix" : "main.inactive-prefix", hEnabled ? "&a[◆] &f" : "&c[◆] &f");
+        String hName = stripLegacyCodes(ui.getString("main.herobrine-label", "Herobrine"));
+        actions.add(ActionButton.builder(Text.legacy(hPrefix + hName))
                 .tooltip(Text.legacy(hEnabled ? "&aActivo" : "&cInactivo"))
                 .action(DialogAction.customClick((view, audience) -> { if (audience instanceof Player p) showHerobrine(p); }, oneUse())).build());
         return Dialog.create(b -> b.empty().base(DialogBase.builder(Text.legacy(ui.getString("main.title", "&4&lCavesLite")))
@@ -74,9 +75,9 @@ public final class AdminDialogs {
         Material material = Material.matchMaterial(ui.getString("main.decorative-item", "SCULK_CATALYST"));
         String description = ui.getString("main.description", "&7Criaturas, encuentros y herramientas");
         if (material != null) {
-            // Paper's item body places the item beside its description. Repeating it gives a balanced header without resource packs.
+            // A Dialog item body is a vertical body entry, not a horizontal layout cell.
+            // Keep one decorative item so the header remains compact and visually aligned.
             body.add(DialogBody.item(new ItemStack(material), DialogBody.plainMessage(Text.legacy(description)), true, true, 40, 40));
-            body.add(DialogBody.item(new ItemStack(material), DialogBody.plainMessage(Text.legacy("&8────────────────")), true, true, 40, 40));
         } else body.add(DialogBody.plainMessage(Text.legacy(description)));
         return body;
     }
@@ -119,7 +120,7 @@ public final class AdminDialogs {
         inputs.add(bool("enabled",l+"enabled","&aSpawn natural",plugin.getConfig().getBoolean(path+"enabled",false)));
         inputs.add(DialogInput.text("name",Text.legacy(ui.getString(l+"name","&fNombre"))).initial(name).maxLength(128).build());
         inputs.add(bool("showname",l+"show-name","&fMostrar nombre",plugin.getConfig().getBoolean(path+"show-name",false)));
-        inputs.add(DialogInput.numberRange("priority",Text.legacy(ui.getString(l+"priority","&ePrioridad (peso relativo 0-10)")),0,10).step(1f).initial((float)Math.min(10,Math.max(0,priority))).build());
+        inputs.add(DialogInput.numberRange("priority",Text.legacy(ui.getString(l+"priority","&ePeso de seleccion (0-10)")),0,10).step(1f).initial((float)Math.min(10,Math.max(0,priority))).build());
         inputs.add(bool("bossbar",l+"bossbar","&dBossBar",plugin.getConfig().getBoolean("boss-bar.mobs."+id,false)));
         inputs.add(range("health","&cVida",1,200,plugin.getConfig().getDouble(path+"health",20)));
         inputs.add(DialogInput.numberRange("ymin",Text.legacy(ui.getString(l+"ymin","&7Altura minima")),-64,320).step(1f).initial((float)minY).build());
@@ -210,6 +211,8 @@ public final class AdminDialogs {
     private boolean yes(Boolean b){return Boolean.TRUE.equals(b);} private float orFloat(Float v,float f){return v==null?f:v;}
     private List<String> parseList(String raw){if(raw==null||raw.isBlank())return new ArrayList<>();List<String> out=new ArrayList<>();for(String x:raw.split("[,\\n]")){String v=x.trim().toUpperCase();if(!v.isEmpty())out.add(v);}return out;}
     private String configuredName(String id){String raw=plugin.getConfig().getString("mobs."+id+".name",pretty(id));return raw==null||raw.isBlank()?pretty(id):raw;}
+    private String plainConfiguredName(String id){ return stripLegacyCodes(configuredName(id)); }
+    private String stripLegacyCodes(String value){ return value == null ? "" : value.replaceAll("(?i)&[0-9A-FK-ORX]", ""); }
     private void saveReload(){plugin.saveConfig();plugin.reloadAll();}
     private ActionButton button(String label,DialogActionCallback cb){return ActionButton.builder(Text.legacy(label)).action(DialogAction.customClick(cb,oneUse())).build();}
     private ClickCallback.Options oneUse(){return ClickCallback.Options.builder().uses(1).build();}

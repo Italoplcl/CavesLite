@@ -195,7 +195,7 @@ CavesLite nació inspirado por **Dangerous Caves 2**, de imDaniX / Evil-Lootlye.
 ### Spawn común de mobs
 `enabled` decide si el mob participa del spawn natural. Invocarlo manualmente sigue siendo posible aunque esté desactivado.
 
-`priority` es un **peso relativo**, no un porcentaje ni una frecuencia. La interfaz usa 0–10 porque diez niveles son suficientes para expresar relaciones simples. Si Giant tiene 10 e Illusioner 5, Giant tiene el doble de peso cuando CavesLite debe escoger entre ambos; esto no significa 10% y 5%. Prioridad 0 equivale a no tener peso en la selección natural.
+`priority` aparece en el Dialog como **Peso de selección (0–10)**. Es un peso relativo, no un porcentaje ni una frecuencia. Si todos los encuentros habilitados tienen el mismo peso, todos tienen la misma probabilidad relativa de ser escogidos: `1/1/1`, `5/5/5` y `10/10/10` son equivalentes entre sí. Si Giant tiene 10 e Illusioner 5, Giant tiene el doble de peso cuando CavesLite debe escoger entre ambos. Peso 0 equivale a no participar en la selección natural.
 
 `cooldown-seconds` es el tiempo mínimo entre dos apariciones naturales del mismo tipo. Es **global para ese tipo de mob**, no por chunk. Un cooldown de 300 no crea un mob cada cinco minutos: sólo impide otro spawn natural de ese tipo durante esos cinco minutos después de uno exitoso.
 
