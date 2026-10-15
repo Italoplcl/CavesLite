@@ -3,10 +3,13 @@
 # as in config.yml.
 
 command:
+  herobrine-debug-player: " herobrine debug <player>"
+  herobrine-debug: " herobrine debug [player]"
+  herobrine-summon: " summon herobrine <player> [type]"
   list: "&7Custom mobs: &f{mobs}"
   reload: "&aConfig reloaded."
   kill-removed: "&aRemoved &e{amount}&a custom mob(s)."
-  usage: "&7Usage: &f/{label} <list|summon <mob> [x y z [world]]|kill [mob]|kills [player]|reload>"
+  usage: "&7Usage: &f/{label} <list|summon|herobrine|kill|kills|options|debug|reload>"
   kills-specify-player: "&cSpecify an online player: &f/{label} kills <player>"
   kills-result: "&7{player}&7's custom mob kills: &e{amount}"
   summon-specify-mob: "&cSpecify a mob: &f/{label} summon <mob>"
@@ -19,3 +22,230 @@ herobrine:
   stop-message: "&8Stop."
   # Name shown on the boss bar, only while in combat.
   bossbar-name: "&4&lHEROBRINE"
+
+# Localized display text; config/dialog values can reference @lang:<key>.
+admindialogs:
+  text-1: "&aActive &8- &f"
+  text-2: "&cInactive &8- &f"
+  text-3: "&aActive"
+  text-4: "&cInactive"
+  text-5: "&4&lCavesLite"
+  text-6: "&7Creatures, encounters and tools"
+  text-7: "&7Changes apply when saved. Advanced settings: &fconfig.yml&7. See &fDOCUMENTATION.md&7."
+  text-8: "&4&lCavesLite &8- &fOptions"
+  text-9: "&bAmbient sounds"
+  text-10: "&bGhost footsteps"
+  text-11: "&cTension / heartbeat"
+  text-12: "&dBossBars"
+  text-13: "&eSpawn titles"
+  text-14: "&6ActionBar warnings"
+  text-15: "&aTrails / particles"
+  text-16: "&6Achievements"
+  text-17: "&eLeaderboards"
+  text-18: "&a✔ Save"
+  text-19: "&aGlobal options updated."
+  text-20: "&aNatural spawning"
+  text-21: "&fName"
+  text-22: "&fShow name"
+  text-23: "&eSelection weight (0-10)"
+  text-24: "&dBossBar"
+  text-25: "&cHealth"
+  text-26: "&7Minimum height"
+  text-27: "&7Maximum height"
+  text-28: "&7Global cooldown (seconds)"
+  text-29: "&7Global active cap (0 = unlimited)"
+  text-30: "&6Drops CavesLite (MATERIAL, MATERIAL)"
+  text-31: "&6Run command on death"
+  text-32: "&7Console command (%player%, %mob%, %world%, %x%, %y%, %z%)"
+  text-33: "&7Priority is relative weight, not percentage. Cooldown and active cap are global. Saving applies immediately."
+  text-34: "&a✔ Save"
+  text-35: "&aSaved: &f"
+  text-36: "&e⚡ Summon"
+  text-37: "&c✖ Remove"
+  text-38: "&7Removed: &f"
+  text-39: "&7Cobweb chance %"
+  text-40: "&7Minion chance %"
+  text-41: "&7Scream chance %"
+  text-42: "&7Death after scream chance %"
+  text-43: "&7Requires target"
+  text-44: "&7Place torches"
+  text-45: "&cRedstone torches"
+  text-46: "&6Drop chance on damage %"
+  text-47: "&7Torch cooldown (seconds)"
+  text-48: "&eBase64 head texture"
+  text-49: "&eBase64 head texture"
+  text-50: "&5Curse of binding"
+  text-51: "&5Equipment swap chance on hit %"
+  text-52: "&7Remove in light"
+  text-53: "&7Sound when removed in light"
+  text-54: "&7Night vision counts as light"
+  text-55: "&cDamage"
+  text-56: "&6Fire touch (ticks)"
+  text-57: "&6Radius"
+  text-58: "&6Block change chance %"
+  text-59: "&7Maximum light"
+  text-60: "&7Damage radius"
+  text-61: "&7Particle"
+  text-62: "&6Damage when extinguished"
+  text-63: "&7Requires target"
+  text-64: "&6Fire chance %"
+  text-65: "&6Magma chance %"
+  text-66: "&cTNT amount"
+  text-67: "&cExplosion chance on damage %"
+  text-68: "&eSpeed amplifier"
+  text-69: "&6Minimum distance from another chest"
+  text-70: "&6Maximum Mimic chests per world"
+  text-71: "&6Chest lifetime (seconds)"
+  text-72: "&6Remove chest on chunk unload"
+  text-73: "&7Slowness"
+  text-74: "&7Attack effects"
+  text-75: "&7Spawn from block %"
+  text-76: "&cAttack damage multiplier"
+  text-77: "&7Damage multiplier without pickaxe"
+  text-78: "&7Damage multiplier with pickaxe"
+  text-79: "&6Variants/drops (MATERIAL, MATERIAL)"
+  text-80: "&aNatural encounters"
+  text-81: "&7Minimum height"
+  text-82: "&7Maximum height"
+  text-83: "&7Cooldown (seconds)"
+  text-84: "&7Minimum interval (seconds)"
+  text-85: "&7Maximum interval (seconds)"
+  text-86: "&7Minimum player distance"
+  text-87: "&7Maximum player distance"
+  text-88: "&dCombat boss bar"
+  text-89: "&cHealth"
+  text-90: "&cDamage"
+  text-91: "&cSneaky strike"
+  text-92: "&cSneaky strike %"
+  text-93: "&cRedstone torches"
+  text-94: "&cTorch chance %"
+  text-95: "&6Command on death"
+  text-96: "&7Console command ({player})"
+  text-97: "&eSkin Base64"
+  text-98: "&4&lHerobrine"
+  text-99: "&7Special encounter configuration. Saving applies immediately."
+  text-100: "&a✔ Save"
+  text-101: "&aHerobrine updated."
+  text-102: "&e⚡ Summon"
+  text-103: "&c✖ Remove"
+  text-104: "&7Herobrine removed."
+cavescommand:
+  herobrine-debug-player: " herobrine debug <player>"
+  herobrine-debug: " herobrine debug [player]"
+  herobrine-summon: " summon herobrine <player> [type]"
+  text-1: "&cOnly a player can open this panel."
+  text-2: "&7Usage: /"
+  text-3: "&cUnknown mob: "
+  text-4: "&6[CavesLite] &fLoaded mobs debug"
+  text-5: "&8Note: this command does not load unloaded chunks."
+  text-6: "&cUse /"
+  text-7: "&7Usage: /"
+  text-8: "&cUse /"
+  text-9: "&cCould not summon Herobrine. Check the type and available loaded safe positions."
+  text-10: "&aHerobrine summoned near &e"
+mobachievements:
+  text-1: "&6Achievement unlocked!"
+  text-2: " &fearned the achievement: "
+dialogs:
+  main:
+    title: "&4&lCavesLite"
+    description: "&7Creatures, encounters and administration tools"
+    active-prefix: "&a[◆] &f"
+    inactive-prefix: "&c[◆] &f"
+    herobrine-label: "&fHerobrine"
+  mob:
+    title-prefix: "&4&l"
+    description: "&7Encounter configuration, appearance and testing"
+    buttons:
+      save: "&a✔ Save"
+      summon: "&e⚡ Summon"
+      remove: "&c✖ Remove"
+    labels:
+      enabled: "&aNatural spawning"
+      name: "&fName"
+      show-name: "&fShow name"
+      priority: "&eSelection weight (0-10)"
+      bossbar: "&dBossBar"
+      ymin: "&7Minimum height"
+      ymax: "&7Maximum height"
+      cooldown: "&7Global cooldown (seconds)"
+      maxactive: "&7Global active cap (0 = unlimited)"
+  options:
+    title: "&4&lCavesLite &8- &fOptions"
+    description: "&7Enable or disable global systems. Advanced settings: config.yml / DOCUMENTATION.md"
+    saved: "&aGlobal options updated."
+    labels:
+      ambient: "&bAmbient sounds"
+      footsteps: "&bGhost footsteps"
+      tension: "&cTension / heartbeat"
+      bossbar: "&dBossBars"
+      spawn-titles: "&eSpawn titles"
+      warnings: "&6ActionBar warnings"
+      trails: "&aTrails / particles"
+      achievements: "&6Achievements"
+      leaderboards: "&eLeaderboards"
+    buttons:
+      save: "&a✔ Save"
+config:
+  boss-bar:
+    format: "&4{mob} &7nearby..."
+  spawn-titles:
+    title: "&4Watch out!"
+    subtitle: "&7{mob} has appeared nearby"
+  warnings:
+    message: "&7You feel something watching you..."
+  achievements:
+    thresholds:
+      5:
+        label: "&6Novice Hunter"
+      15:
+        label: "&6Hunter of the Depths"
+      30:
+        label: "&4Terror of the Caves"
+      50:
+        label: "&4Legend of the Caverns"
+  mobs:
+    alpha-spider:
+      name: "&4Alpha Spider"
+    crying-bat:
+      name: "&4Crying Bat"
+    dead-miner:
+      name: "&4Dead Miner"
+    hexed-armor:
+      name: "&4Hexed Armor"
+    hungering-darkness:
+      name: ""
+    lava-creeper:
+      name: "&4Lava Creeper"
+    magma-monster:
+      name: "&4Magma Monster"
+    smoke-demon:
+      name: ""
+    tnt-creeper:
+      name: "&4TNT Creeper"
+    watcher:
+      name: "&4Watcher"
+    mimic:
+      name: "&4Mimic"
+    cave-golem:
+      name: "&4Cave Golem"
+    giant-zombie:
+      name: "&4Giant Zombie"
+    chicken-jockey:
+      name: "&cChicken Jockey"
+    killer-bunny:
+      name: "&4The Killer Bunny"
+    illusioner:
+      name: "&5Illusioner"
+    spider-jockey:
+      name: "&4Spider Jockey"
+    skeleton-horseman:
+      name: "&7Skeleton Horseman"
+
+nether:
+  enabled-label: "&cNatural spawning in Nether"
+
+achievement:
+  kills-suffix: " kills)"
+debug:
+  loaded: "loaded"

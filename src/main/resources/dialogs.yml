@@ -1,34 +1,34 @@
-# CavesLite 1.12.1 - apariencia de los paneles administrativos
+# CavesLite 1.12.2 - apariencia de los paneles administrativos
 # Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
 # Los colores usan el formato legacy de Minecraft (&a, &c, &l, etc.).
 main:
-  title: "&4&lCavesLite"
-  description: "&7Criaturas, encuentros y herramientas de administracion"
+  title: "@lang:dialogs.main.title"
+  description: "@lang:dialogs.main.description"
   columns: 3
-  active-prefix: "&a[◆] &f"
-  inactive-prefix: "&c[◆] &f"
+  active-prefix: "@lang:dialogs.main.active-prefix"
+  inactive-prefix: "@lang:dialogs.main.inactive-prefix"
   decorative-item: SCULK_CATALYST
-  herobrine-label: "&fHerobrine"
+  herobrine-label: "@lang:dialogs.main.herobrine-label"
 
 mob:
-  title-prefix: "&4&l"
-  description: "&7Configuracion, apariencia y prueba del encuentro"
+  title-prefix: "@lang:dialogs.mob.title-prefix"
+  description: "@lang:dialogs.mob.description"
   icon-width: 48
   icon-height: 48
   buttons:
-    save: "&a✔ Guardar"
-    summon: "&e⚡ Invocar"
-    remove: "&c✖ Eliminar"
+    save: "@lang:dialogs.mob.buttons.save"
+    summon: "@lang:dialogs.mob.buttons.summon"
+    remove: "@lang:dialogs.mob.buttons.remove"
   labels:
-    enabled: "&aSpawn natural"
-    name: "&fNombre"
-    show-name: "&fMostrar nombre"
-    priority: "&ePeso de seleccion (0-10)"
-    bossbar: "&dBossBar"
-    ymin: "&7Altura minima"
-    ymax: "&7Altura maxima"
-    cooldown: "&7Cooldown global (segundos)"
-    maxactive: "&7Maximo activo global (0 = sin limite)"
+    enabled: "@lang:dialogs.mob.labels.enabled"
+    name: "@lang:dialogs.mob.labels.name"
+    show-name: "@lang:dialogs.mob.labels.show-name"
+    priority: "@lang:dialogs.mob.labels.priority"
+    bossbar: "@lang:dialogs.mob.labels.bossbar"
+    ymin: "@lang:dialogs.mob.labels.ymin"
+    ymax: "@lang:dialogs.mob.labels.ymax"
+    cooldown: "@lang:dialogs.mob.labels.cooldown"
+    maxactive: "@lang:dialogs.mob.labels.maxactive"
 
 icons:
   alpha-spider: SPIDER_EYE
@@ -51,22 +51,21 @@ icons:
   skeleton-horseman: SKELETON_HORSE_SPAWN_EGG
   herobrine: PLAYER_HEAD
 
-
 # Panel global: /clite options
 # Solo contiene sistemas que existen realmente en el plugin.
 options:
-  title: "&4&lCavesLite &8- &fOpciones"
-  description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / DOCUMENTATION.md"
-  saved: "&aOpciones globales actualizadas."
+  title: "@lang:dialogs.options.title"
+  description: "@lang:dialogs.options.description"
+  saved: "@lang:dialogs.options.saved"
   labels:
-    ambient: "&bSonidos ambientales"
-    footsteps: "&bPasos fantasma"
-    tension: "&cTension / latidos"
-    bossbar: "&dBossBars"
-    spawn-titles: "&eTitulos de aparicion"
-    warnings: "&6Avisos ActionBar"
-    trails: "&aTrails / particulas"
-    achievements: "&6Achievements"
-    leaderboards: "&eLeaderboards"
+    ambient: "@lang:dialogs.options.labels.ambient"
+    footsteps: "@lang:dialogs.options.labels.footsteps"
+    tension: "@lang:dialogs.options.labels.tension"
+    bossbar: "@lang:dialogs.options.labels.bossbar"
+    spawn-titles: "@lang:dialogs.options.labels.spawn-titles"
+    warnings: "@lang:dialogs.options.labels.warnings"
+    trails: "@lang:dialogs.options.labels.trails"
+    achievements: "@lang:dialogs.options.labels.achievements"
+    leaderboards: "@lang:dialogs.options.labels.leaderboards"
   buttons:
-    save: "&a✔ Guardar"
+    save: "@lang:dialogs.options.buttons.save"

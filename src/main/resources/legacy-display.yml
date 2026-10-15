@@ -1,0 +1,95 @@
+config:
+  boss-bar:
+    format: "&4{mob} &7cerca..."
+  spawn-titles:
+    title: "&4¡Cuidado!"
+    subtitle: "&7{mob} ha aparecido cerca"
+  warnings:
+    message: "&7Sientes que algo te observa..."
+  achievements:
+    thresholds:
+      5:
+        label: "&6Cazador Novato"
+      15:
+        label: "&6Cazador de las Profundidades"
+      30:
+        label: "&4Terror de las Cuevas"
+      50:
+        label: "&4Leyenda de las Cavernas"
+  mobs:
+    alpha-spider:
+      name: "&4Alpha Spider"
+    crying-bat:
+      name: "&4Crying Bat"
+    dead-miner:
+      name: "&4Dead Miner"
+    hexed-armor:
+      name: "&4Hexed Armor"
+    hungering-darkness:
+      name: ""
+    lava-creeper:
+      name: "&4Lava Creeper"
+    magma-monster:
+      name: "&4Magma Monster"
+    smoke-demon:
+      name: ""
+    tnt-creeper:
+      name: "&4TNT Creeper"
+    watcher:
+      name: "&4Watcher"
+    mimic:
+      name: "&4Mimic"
+    cave-golem:
+      name: "&4Cave Golem"
+    giant-zombie:
+      name: "&4Giant Zombie"
+    chicken-jockey:
+      name: "&cChicken Jockey"
+    killer-bunny:
+      name: "&4The Killer Bunny"
+    illusioner:
+      name: "&5Illusioner"
+    spider-jockey:
+      name: "&4Spider Jockey"
+    skeleton-horseman:
+      name: "&7Skeleton Horseman"
+dialogs:
+  main:
+    title: "&4&lCavesLite"
+    description: "&7Criaturas, encuentros y herramientas de administracion"
+    active-prefix: "&a[◆] &f"
+    inactive-prefix: "&c[◆] &f"
+    herobrine-label: "&fHerobrine"
+  mob:
+    title-prefix: "&4&l"
+    description: "&7Configuracion, apariencia y prueba del encuentro"
+    buttons:
+      save: "&a✔ Guardar"
+      summon: "&e⚡ Invocar"
+      remove: "&c✖ Eliminar"
+    labels:
+      enabled: "&aSpawn natural"
+      name: "&fNombre"
+      show-name: "&fMostrar nombre"
+      priority: "&ePeso de seleccion (0-10)"
+      bossbar: "&dBossBar"
+      ymin: "&7Altura minima"
+      ymax: "&7Altura maxima"
+      cooldown: "&7Cooldown global (segundos)"
+      maxactive: "&7Maximo activo global (0 = sin limite)"
+  options:
+    title: "&4&lCavesLite &8- &fOpciones"
+    description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / DOCUMENTATION.md"
+    saved: "&aOpciones globales actualizadas."
+    labels:
+      ambient: "&bSonidos ambientales"
+      footsteps: "&bPasos fantasma"
+      tension: "&cTension / latidos"
+      bossbar: "&dBossBars"
+      spawn-titles: "&eTitulos de aparicion"
+      warnings: "&6Avisos ActionBar"
+      trails: "&aTrails / particulas"
+      achievements: "&6Achievements"
+      leaderboards: "&eLeaderboards"
+    buttons:
+      save: "&a✔ Guardar"

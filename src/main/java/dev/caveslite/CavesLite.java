@@ -73,6 +73,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         saveDefaultConfig();
 
         lang = new Lang(this);
+        lang.reload(getConfig().getString("language", "es"));
 
         mobs = new MobManager(this);
         mimic = new Mimic(mobs);
@@ -142,11 +143,13 @@ public final class CavesLite extends JavaPlugin implements Listener {
         }
     }
 
+    public Lang getLanguage() { return lang; }
+
     /** Re-reads config.yml and applies it. */
     public void reloadAll() {
         reloadConfig();
-        var config = getConfig();
-        lang.reload(config.getString("language", "es"));
+        lang.reload(getConfig().getString("language", "es"));
+        var config = lang.displayCopy(getConfig(), "config");
         var ambientSection = Utils.section(config, "caverns.ambient");
         ambient.reload(ambientSection);
         footsteps.reload(Utils.section(ambientSection, "footsteps"));

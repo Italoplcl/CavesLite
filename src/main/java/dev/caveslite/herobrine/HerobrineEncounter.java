@@ -274,7 +274,7 @@ public final class HerobrineEncounter implements Listener {
         long now = firstWorldTime();
 
         for (World world : Bukkit.getWorlds()) {
-            if (!worlds.allows(world)) continue;
+            if (world.getEnvironment() == World.Environment.THE_END || !worlds.allows(world)) continue;
             for (Player player : world.getPlayers()) {
                 UUID pid = player.getUniqueId();
                 Long cooldown = playerCooldowns.get(pid);
@@ -456,7 +456,6 @@ public final class HerobrineEncounter implements Listener {
         return null;
     }
 
-
     private boolean isSafeSpawnColumn(Block feet, Block headBlock, Block floor) {
         if (!feet.isPassable() || !headBlock.isPassable()) return false;
         Material ground = floor.getType();
@@ -629,6 +628,11 @@ public final class HerobrineEncounter implements Listener {
         if (target == null || !target.isOnline() || !target.getWorld().equals(entity.getWorld())) {
             endCombat(instance); vanish(entity, instance); return;
         }
+
+        // Track independently of movement, including close range and blocked steps.
+        Location facing = entity.getLocation();
+        facePlayer(facing, target);
+        entity.setRotation(facing.getYaw(), facing.getPitch());
 
         long elapsed = now - instance.combatStartTick().get();
         double fraction = entity.getHealth() / Math.max(1, health);

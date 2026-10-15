@@ -37,7 +37,7 @@ public final class MobAchievements implements Listener {
     /** A kill-count milestone: the label shown/announced, and its money reward. */
     public record Milestone(String label, double reward) {}
 
-    private final Plugin plugin;
+    private final CavesLite plugin;
     private final NamespacedKey killsKey;
     private final VaultEconomy economy;
 
@@ -48,7 +48,7 @@ public final class MobAchievements implements Listener {
     private double perKillReward;
     private TreeMap<Integer, Milestone> thresholds = new TreeMap<>();
 
-    public MobAchievements(Plugin plugin, VaultEconomy economy) {
+    public MobAchievements(CavesLite plugin, VaultEconomy economy) {
         this.plugin = plugin;
         this.economy = economy;
         this.killsKey = new NamespacedKey(plugin, "custom-mob-kills");
@@ -110,7 +110,7 @@ public final class MobAchievements implements Listener {
     private void celebrate(Player player, int kills, Milestone milestone) {
         Component subtitle = Text.legacy(milestone.label());
         player.showTitle(Title.title(
-                Text.legacy("&6\u00a1Logro desbloqueado!"),
+                Text.legacy(plugin.getLanguage().get("mobachievements.text-1")),
                 subtitle,
                 Title.Times.times(Duration.ofMillis(250), Duration.ofSeconds(3), Duration.ofMillis(500))
         ));
@@ -121,9 +121,9 @@ public final class MobAchievements implements Listener {
             economy.deposit(player, milestone.reward());
         }
         if (broadcast) {
-            Component announcement = Text.legacy("&7" + player.getName() + " &falcanz\u00f3 el logro: ")
+            Component announcement = Text.legacy("&7" + player.getName() + plugin.getLanguage().get("mobachievements.text-2"))
                     .append(subtitle)
-                    .append(Text.legacy("&7 (" + kills + " muertes)"));
+                    .append(Text.legacy("&7 (" + kills + plugin.getLanguage().get("achievement.kills-suffix")));
             Bukkit.getServer().sendMessage(announcement);
         }
     }

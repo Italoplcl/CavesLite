@@ -49,7 +49,7 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
             case "options", "option", "opciones" -> {
                 if (sender instanceof Player player) dialogs.showOptions(player);
-                else Text.send(sender, "§cEste panel solo puede abrirlo un jugador.");
+                else Text.send(sender, plugin.getLanguage().get("cavescommand.text-1"));
             }
 
             case "reload", "r" -> {
@@ -59,16 +59,16 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
             case "debug" -> {
                 if (args.length < 2 || !args[1].equalsIgnoreCase("mobs")) {
-                    Text.send(sender, "§7Uso: /" + label + " debug mobs [mob]");
+                    Text.send(sender, plugin.getLanguage().get("cavescommand.text-2") + label + " debug mobs [mob]");
                 } else {
                     String filter = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : null;
                     if (filter != null && mobs.getMob(filter) == null) {
-                        Text.send(sender, "§cMob desconocido: " + filter);
+                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-3") + filter);
                     } else {
                         List<String> lines = mobs.debugMobLines(filter);
-                        Text.send(sender, "§6[CavesLite] §fDebug de mobs cargados");
-                        for (String line : lines) Text.send(sender, "§7" + line);
-                        Text.send(sender, "§8Nota: el comando no fuerza la carga de chunks descargados.");
+                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-4"));
+                        for (String line : lines) Text.send(sender, "&7" + line);
+                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-5"));
                     }
                 }
             }
@@ -97,9 +97,9 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             case "herobrine" -> {
                 if (args.length >= 2 && args[1].equalsIgnoreCase("debug")) {
                     Player target = args.length >= 3 ? Bukkit.getPlayer(args[2]) : sender instanceof Player p ? p : null;
-                    if (target == null) Text.send(sender, "§cUsa /" + label + " herobrine debug <jugador>");
-                    else Text.send(sender, "§7" + plugin.getHerobrine().debug(target));
-                } else Text.send(sender, "§7Uso: /" + label + " herobrine debug [jugador]");
+                    if (target == null) Text.send(sender, plugin.getLanguage().get("cavescommand.text-6") + label + lang.get("command.herobrine-debug-player"));
+                    else Text.send(sender, "&7" + plugin.getHerobrine().debug(target));
+                } else Text.send(sender, plugin.getLanguage().get("cavescommand.text-7") + label + lang.get("command.herobrine-debug"));
             }
 
             case "kills" -> {
@@ -139,14 +139,14 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
                 }
             }
             if (target == null) {
-                Text.send(sender, "§cUsa /" + label + " summon herobrine <jugador> [tipo]");
+                Text.send(sender, plugin.getLanguage().get("cavescommand.text-8") + label + lang.get("command.herobrine-summon"));
                 return;
             }
             if (!plugin.getHerobrine().summonFor(target, encounter)) {
-                Text.send(sender, "§cNo se pudo invocar a Herobrine. Revisa el tipo o no hay una posición segura cargada.");
+                Text.send(sender, plugin.getLanguage().get("cavescommand.text-9"));
                 return;
             }
-            Text.send(sender, "§aHerobrine invocado cerca de §e" + target.getName() + "§a (" + encounter.toUpperCase(Locale.ROOT) + ").");
+            Text.send(sender, plugin.getLanguage().get("cavescommand.text-10") + target.getName() + "&a (" + encounter.toUpperCase(Locale.ROOT) + ").");
             return;
         }
         if (mobs.getMob(type) == null) {

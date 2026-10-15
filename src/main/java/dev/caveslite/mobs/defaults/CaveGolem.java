@@ -92,6 +92,8 @@ public class CaveGolem extends MobBase implements Listener {
     public void onBreak(BlockBreakEvent event) {
         if (spawnFromBlockChance <= 0) return;
         Block block = event.getBlock();
+        // Nether encounters must use the natural replacement engine; End is excluded.
+        if (block.getWorld().getEnvironment() != org.bukkit.World.Environment.NORMAL) return;
         if (manager.isWorldEnabled(block.getWorld())
                 && variants.contains(block.getType())
                 && Rng.chance(spawnFromBlockChance)) {

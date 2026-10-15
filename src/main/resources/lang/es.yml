@@ -3,10 +3,13 @@
 # color (&a, &4, etc.) funcionan igual que en config.yml.
 
 command:
+  herobrine-debug-player: " herobrine debug <jugador>"
+  herobrine-debug: " herobrine debug [jugador]"
+  herobrine-summon: " summon herobrine <jugador> [tipo]"
   list: "&7Mobs personalizados: &f{mobs}"
   reload: "&aConfiguración recargada."
   kill-removed: "&aSe eliminaron &e{amount}&a mob(s) personalizado(s)."
-  usage: "&7Uso: &f/{label} <list|summon <mob> [x y z [mundo]]|kill [mob]|kills [jugador]|reload>"
+  usage: "&7Uso: &f/{label} <list|summon|herobrine|kill|kills|options|debug|reload>"
   kills-specify-player: "&cIndica un jugador conectado: &f/{label} kills <jugador>"
   kills-result: "&7Muertes de mobs personalizados de {player}&7: &e{amount}"
   summon-specify-mob: "&cIndica un mob: &f/{label} summon <mob>"
@@ -19,3 +22,230 @@ herobrine:
   stop-message: "&8Stop."
   # Nombre mostrado en la bossbar, solo durante el combate.
   bossbar-name: "&4&lHEROBRINE"
+
+# Localized display text; config/dialog values can reference @lang:<key>.
+admindialogs:
+  text-1: "&aActivo &8- &f"
+  text-2: "&cInactivo &8- &f"
+  text-3: "&aActivo"
+  text-4: "&cInactivo"
+  text-5: "&4&lCavesLite"
+  text-6: "&7Criaturas, encuentros y herramientas"
+  text-7: "&7Los checks se aplican al guardar. Ajustes avanzados: &fconfig.yml&7. Consulta &fDOCUMENTATION.md&7."
+  text-8: "&4&lCavesLite &8- &fOpciones"
+  text-9: "&bSonidos ambientales"
+  text-10: "&bPasos fantasma"
+  text-11: "&cTension / latidos"
+  text-12: "&dBossBars"
+  text-13: "&eTitulos de aparicion"
+  text-14: "&6Avisos ActionBar"
+  text-15: "&aTrails / particulas"
+  text-16: "&6Achievements"
+  text-17: "&eLeaderboards"
+  text-18: "&a✔ Guardar"
+  text-19: "&aOpciones globales actualizadas."
+  text-20: "&aSpawn natural"
+  text-21: "&fNombre"
+  text-22: "&fMostrar nombre"
+  text-23: "&ePeso de seleccion (0-10)"
+  text-24: "&dBossBar"
+  text-25: "&cVida"
+  text-26: "&7Altura minima"
+  text-27: "&7Altura maxima"
+  text-28: "&7Cooldown global (segundos)"
+  text-29: "&7Maximo activo global (0 = sin limite)"
+  text-30: "&6Drops CavesLite (MATERIAL, MATERIAL)"
+  text-31: "&6Ejecutar comando al morir"
+  text-32: "&7Comando consola (%player%, %mob%, %world%, %x%, %y%, %z%)"
+  text-33: "&7Prioridad = peso relativo, no porcentaje. Cooldown y maximo activo son globales. Guardar aplica inmediatamente."
+  text-34: "&a✔ Guardar"
+  text-35: "&aGuardado: &f"
+  text-36: "&e⚡ Invocar"
+  text-37: "&c✖ Eliminar"
+  text-38: "&7Eliminados: &f"
+  text-39: "&7Probabilidad telaraña %"
+  text-40: "&7Probabilidad minion %"
+  text-41: "&7Probabilidad de grito %"
+  text-42: "&7Probabilidad de morir tras gritar %"
+  text-43: "&7Requiere objetivo"
+  text-44: "&7Colocar antorchas"
+  text-45: "&cAntorchas redstone"
+  text-46: "&6Probabilidad drop al recibir daño %"
+  text-47: "&7Cooldown antorchas (segundos)"
+  text-48: "&eTextura cabeza Base64"
+  text-49: "&eTextura cabeza Base64"
+  text-50: "&5Maldicion de ligamiento"
+  text-51: "&5Probabilidad intercambio al golpear %"
+  text-52: "&7Eliminar con luz"
+  text-53: "&7Sonido al desaparecer con luz"
+  text-54: "&7Vision nocturna cuenta como luz"
+  text-55: "&cDaño"
+  text-56: "&6Fire touch (ticks)"
+  text-57: "&6Radio"
+  text-58: "&6Probabilidad cambiar bloque %"
+  text-59: "&7Luz maxima"
+  text-60: "&7Radio de daño"
+  text-61: "&7Particula"
+  text-62: "&6Daño al extinguirse"
+  text-63: "&7Requiere objetivo"
+  text-64: "&6Probabilidad fuego %"
+  text-65: "&6Probabilidad magma %"
+  text-66: "&cCantidad TNT"
+  text-67: "&cProbabilidad explosion al recibir daño %"
+  text-68: "&eAmplificador de velocidad"
+  text-69: "&6Distancia minima de otro cofre"
+  text-70: "&6Maximo cofres Mimic por mundo"
+  text-71: "&6Vida del cofre (segundos)"
+  text-72: "&6Eliminar cofre al descargar chunk"
+  text-73: "&7Lentitud"
+  text-74: "&7Efectos al atacar"
+  text-75: "&7Spawn desde bloque %"
+  text-76: "&cMultiplicador daño ataque"
+  text-77: "&7Multiplicador daño sin pico"
+  text-78: "&7Multiplicador daño con pico"
+  text-79: "&6Variantes/drops (MATERIAL, MATERIAL)"
+  text-80: "&aEncuentros naturales"
+  text-81: "&7Altura minima"
+  text-82: "&7Altura maxima"
+  text-83: "&7Cooldown (segundos)"
+  text-84: "&7Intervalo minimo (segundos)"
+  text-85: "&7Intervalo maximo (segundos)"
+  text-86: "&7Distancia minima jugador"
+  text-87: "&7Distancia maxima jugador"
+  text-88: "&dBossBar de combate"
+  text-89: "&cVida"
+  text-90: "&cDaño"
+  text-91: "&cSneaky strike"
+  text-92: "&cSneaky strike %"
+  text-93: "&cAntorchas redstone"
+  text-94: "&cProbabilidad antorcha %"
+  text-95: "&6Comando al morir"
+  text-96: "&7Comando consola ({player})"
+  text-97: "&eSkin Base64"
+  text-98: "&4&lHerobrine"
+  text-99: "&7Configuracion del encuentro especial. Guardar aplica inmediatamente."
+  text-100: "&a✔ Guardar"
+  text-101: "&aHerobrine actualizado."
+  text-102: "&e⚡ Invocar"
+  text-103: "&c✖ Eliminar"
+  text-104: "&7Herobrine eliminado."
+cavescommand:
+  herobrine-debug-player: " herobrine debug <jugador>"
+  herobrine-debug: " herobrine debug [jugador]"
+  herobrine-summon: " summon herobrine <jugador> [tipo]"
+  text-1: "&cEste panel solo puede abrirlo un jugador."
+  text-2: "&7Uso: /"
+  text-3: "&cMob desconocido: "
+  text-4: "&6[CavesLite] &fDebug de mobs cargados"
+  text-5: "&8Nota: el comando no fuerza la carga de chunks descargados."
+  text-6: "&cUsa /"
+  text-7: "&7Uso: /"
+  text-8: "&cUsa /"
+  text-9: "&cNo se pudo invocar a Herobrine. Revisa el tipo o no hay una posición segura cargada."
+  text-10: "&aHerobrine invocado cerca de &e"
+mobachievements:
+  text-1: "&6¡Logro desbloqueado!"
+  text-2: " &falcanzó el logro: "
+dialogs:
+  main:
+    title: "&4&lCavesLite"
+    description: "&7Criaturas, encuentros y herramientas de administracion"
+    active-prefix: "&a[◆] &f"
+    inactive-prefix: "&c[◆] &f"
+    herobrine-label: "&fHerobrine"
+  mob:
+    title-prefix: "&4&l"
+    description: "&7Configuracion, apariencia y prueba del encuentro"
+    buttons:
+      save: "&a✔ Guardar"
+      summon: "&e⚡ Invocar"
+      remove: "&c✖ Eliminar"
+    labels:
+      enabled: "&aSpawn natural"
+      name: "&fNombre"
+      show-name: "&fMostrar nombre"
+      priority: "&ePeso de seleccion (0-10)"
+      bossbar: "&dBossBar"
+      ymin: "&7Altura minima"
+      ymax: "&7Altura maxima"
+      cooldown: "&7Cooldown global (segundos)"
+      maxactive: "&7Maximo activo global (0 = sin limite)"
+  options:
+    title: "&4&lCavesLite &8- &fOpciones"
+    description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / DOCUMENTATION.md"
+    saved: "&aOpciones globales actualizadas."
+    labels:
+      ambient: "&bSonidos ambientales"
+      footsteps: "&bPasos fantasma"
+      tension: "&cTension / latidos"
+      bossbar: "&dBossBars"
+      spawn-titles: "&eTitulos de aparicion"
+      warnings: "&6Avisos ActionBar"
+      trails: "&aTrails / particulas"
+      achievements: "&6Achievements"
+      leaderboards: "&eLeaderboards"
+    buttons:
+      save: "&a✔ Guardar"
+config:
+  boss-bar:
+    format: "&4{mob} &7cerca..."
+  spawn-titles:
+    title: "&4¡Cuidado!"
+    subtitle: "&7{mob} ha aparecido cerca"
+  warnings:
+    message: "&7Sientes que algo te observa..."
+  achievements:
+    thresholds:
+      5:
+        label: "&6Cazador Novato"
+      15:
+        label: "&6Cazador de las Profundidades"
+      30:
+        label: "&4Terror de las Cuevas"
+      50:
+        label: "&4Leyenda de las Cavernas"
+  mobs:
+    alpha-spider:
+      name: "&4Araña alfa"
+    crying-bat:
+      name: "&4Murciélago llorón"
+    dead-miner:
+      name: "&4Minero muerto"
+    hexed-armor:
+      name: "&4Armadura embrujada"
+    hungering-darkness:
+      name: ""
+    lava-creeper:
+      name: "&4Creeper de lava"
+    magma-monster:
+      name: "&4Monstruo de magma"
+    smoke-demon:
+      name: ""
+    tnt-creeper:
+      name: "&4Creeper de TNT"
+    watcher:
+      name: "&4Vigilante"
+    mimic:
+      name: "&4Mimic"
+    cave-golem:
+      name: "&4Gólem de las cuevas"
+    giant-zombie:
+      name: "&4Zombie gigante"
+    chicken-jockey:
+      name: "&cJinete de gallina"
+    killer-bunny:
+      name: "&4Conejo asesino"
+    illusioner:
+      name: "&5Ilusionista"
+    spider-jockey:
+      name: "&4Jinete de araña"
+    skeleton-horseman:
+      name: "&7Jinete esqueleto"
+
+nether:
+  enabled-label: "&cSpawn natural en Nether"
+
+achievement:
+  kills-suffix: " muertes)"
+debug:
+  loaded: "cargados"

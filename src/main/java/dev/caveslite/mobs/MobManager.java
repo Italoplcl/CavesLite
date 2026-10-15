@@ -49,6 +49,9 @@ public final class MobManager implements Listener {
     private final Map<String, Set<UUID>> activeByMob = new HashMap<>();
     private final WorldFilter worlds = new WorldFilter();
 
+    private final Map<String, Boolean> netherEnabled = new HashMap<>();
+    private double portalMultiplier;
+    private int portalRadius;
     private WeightedPool<CustomMob> pool = new WeightedPool<>();
     private Set<EntityType> replaceTypes = Set.of();
     private boolean enabled;
@@ -88,9 +91,15 @@ public final class MobManager implements Listener {
                 : Arrays.asList("ZOMBIE", "HUSK", "SKELETON", "STRAY", "CREEPER", "SPIDER", "WITCH", "ENDERMAN");
         replaceTypes = Utils.entityTypes(replace);
 
+        netherEnabled.clear();
+        portalMultiplier = cfg.getDouble("nether.giant-zombie-ruined-portal-weight-multiplier", 3.0);
+        if (!Double.isFinite(portalMultiplier)) portalMultiplier = 1.0;
+        portalMultiplier = Math.max(0, Math.min(100, portalMultiplier));
+        portalRadius = Math.max(0, Math.min(128, cfg.getInt("nether.ruined-portal-radius", 48)));
         pool = new WeightedPool<>();
         for (CustomMob mob : mobs.values()) {
             mob.reload(Utils.section(cfg, mob.id()));
+            netherEnabled.put(mob.id(), cfg.getBoolean(mob.id() + ".nether-enabled", false));
             if (mob.enabled() && mob.weight() > 0) pool.add(mob, mob.weight());
         }
     }
@@ -135,6 +144,7 @@ public final class MobManager implements Listener {
     public void onNaturalSpawn(CreatureSpawnEvent event) {
         if (!enabled || pool.isEmpty() || event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) return;
         if (!replaceTypes.contains(event.getEntityType())) return;
+        if (event.getLocation().getWorld().getEnvironment() == World.Environment.THE_END) return;
 
         Location loc = event.getLocation();
         if (!worlds.allows(loc.getWorld())
@@ -143,10 +153,33 @@ public final class MobManager implements Listener {
             return;
         }
 
-        CustomMob mob = pool.next();
-        if ((mob.usesGlobalYRange() && (loc.getBlockY() > yMax || loc.getBlockY() < yMin))
+        boolean nether = loc.getWorld().getEnvironment() == World.Environment.NETHER;
+        if (nether && NetherSpawns.excludedStructure(loc)) return;
+        CustomMob mob;
+        if (nether) {
+            // Same natural event, chance, light, cooldown and cap pipeline as Overworld.
+            double total = 0;
+            Map<CustomMob, Double> candidates = new LinkedHashMap<>();
+            boolean nearPortal = portalMultiplier != 1 && NetherSpawns.nearRuinedPortal(loc, portalRadius);
+            for (CustomMob candidate : mobs.values()) {
+                if (!candidate.enabled() || !netherEnabled.getOrDefault(candidate.id(), false) || candidate.weight() <= 0) continue;
+                double weight = candidate.weight() * (nearPortal && candidate.id().equals("giant-zombie") ? portalMultiplier : 1);
+                if (weight > 0) { candidates.put(candidate, weight); total += weight; }
+            }
+            if (total <= 0) return;
+            double roll = java.util.concurrent.ThreadLocalRandom.current().nextDouble(total);
+            mob = null;
+            for (var entry : candidates.entrySet()) {
+                roll -= entry.getValue();
+                if (roll < 0) { mob = entry.getKey(); break; }
+            }
+            if (mob == null || !NetherSpawns.hasSpace(mob, loc) || !mob.canSpawn(loc)) return;
+        } else {
+            mob = pool.next();
+        }
+        if (!nether && ((mob.usesGlobalYRange() && (loc.getBlockY() > yMax || loc.getBlockY() < yMin))
                 || loc.getBlockY() < mob.spawnYMin() || loc.getBlockY() > mob.spawnYMax()
-                || !mob.naturalContextAllowed(loc) || !mob.canSpawn(loc)) return;
+                || !mob.naturalContextAllowed(loc) || !mob.canSpawn(loc))) return;
         long now = System.currentTimeMillis();
         if (mob.cooldownMillis() > 0 && now - lastNaturalSpawn.getOrDefault(mob.id(), 0L) < mob.cooldownMillis()) return;
         if (mob.maxActive() > 0 && countActive(mob.id()) >= mob.maxActive()) return;
@@ -155,7 +188,6 @@ public final class MobManager implements Listener {
         spawn(mob, loc);
         lastNaturalSpawn.put(mob.id(), now);
     }
-
 
     private int countActive(String id) {
         Set<UUID> ids = activeByMob.get(id);
@@ -194,7 +226,6 @@ public final class MobManager implements Listener {
             }
         }
     }
-
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onDeath(EntityDeathEvent event) {
@@ -270,7 +301,7 @@ public final class MobManager implements Listener {
         List<String> out = new java.util.ArrayList<>();
         for (String id : mobs.keySet()) {
             if (filterId != null && !filterId.equals(id)) continue;
-            out.add(id + ": " + counts.getOrDefault(id, 0) + " cargados");
+            out.add(id + ": " + counts.getOrDefault(id, 0) + " " + ((dev.caveslite.CavesLite) plugin).getLanguage().get("debug.loaded"));
             int prefixIndex = out.size();
             // Entity detail lines are appended below in a second scan to keep grouping deterministic.
             int n = 0;

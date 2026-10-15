@@ -51,7 +51,6 @@ Con todos los encuentros OFF, ejecutar una sesión comparable con Spark. Revisar
 
 Luego repetir con los encuentros que realmente se usarán en producción.
 
-
 ## Dialog reopening regression (1.11.1)
 1. Ejecuta `/clite` o `/clite`.
 2. Abre Cave Golem.
@@ -60,7 +59,7 @@ Luego repetir con los encuentros que realmente se usarán en producción.
 5. Cave Golem y cualquier otro encuentro deben abrir normalmente.
 6. Repite el ciclo varias veces y prueba Guardar, Invocar y Eliminar.
 
-## 1.12.0 - Dialogs/configuración
+## 1.12.2 - Dialogs/configuración
 1. `/clite` abre el panel; `/clite` también; `/clite` debe ser comando desconocido.
 2. Abrir/cerrar varios mobs repetidamente: ningún botón debe quedar muerto.
 3. Activar un mob, Guardar y volver al panel: indicador verde. Desactivarlo: rojo.
@@ -72,10 +71,22 @@ Luego repetir con los encuentros que realmente se usarán en producción.
 9. Descargar/recargar el chunk de un mob con `max-active: 1`: no debe poder generarse un segundo mientras el primero siga persistente.
 10. `/clite options`: Guardar debe aplicar inmediatamente sin `/clite reload`.
 
-
-## 1.12.1 - correcciones visuales del Dialog principal
+## 1.12.2 - correcciones visuales del Dialog principal
 - Con todos los mobs OFF, comprobar que sólo `[◆]` esté rojo y todos los nombres se vean blancos.
 - Activar dos mobs, guardar y reabrir `/clite`: sólo `[◆]` debe pasar a verde; el nombre debe seguir blanco.
 - Confirmar que colores configurados en `name` sigan aplicándose a la entidad/avisos, pero no alteren la lista administrativa principal.
 - Confirmar que la cabecera tenga un solo `SCULK_CATALYST` y no aparezca una segunda línea decorativa desalineada.
 - Confirmar que el control se llame `Peso de seleccion (0-10)`.
+
+
+## 1.12.2: regresiones específicas
+
+1. Cambiar `language` entre `es` y `en`, recargar y abrir los paneles principal, global, de mobs y Herobrine. Probar comandos desde consola, avisos, títulos y logros.
+2. Quitar una clave de `lang/en.yml`: debe usarse la clave inglesa incluida. Probar un idioma inexistente: debe usarse español. Personalizar un texto de config: debe permanecer literal. Guardar un panel sin editar el nombre y cambiar de idioma: el nombre predeterminado debe seguir traducible.
+3. Permitir el mundo Nether y habilitar un mob con peso positivo: con `nether-enabled: false` no debe reemplazar apariciones. Al habilitarlo, probar el mismo evento NATURAL, chance, cooldown y cap que Overworld. Añadir tipos Nether a `replace-mobs` si se quieren probar piglins u otros.
+4. Probar a distintas alturas en Nether (incluidas fuera de límites Overworld), con techos bajos, lava y paredes. Un gigante no debe caber en un túnel normal. Comprobar también pasajeros.
+5. Probar dentro/fuera de fortalezas y bastiones reales; dentro debe conservarse el mob vanilla. Un portal en ruinas no bloquea apariciones. Comparar pesos con multiplicadores 0, 1 y 3; no confundir peso relativo con probabilidad final. Comprobar base 0 y mob desactivado.
+6. Confirmar que el End no produce reemplazos ni encuentros naturales de Herobrine, aunque aparezca en listas de mundos.
+7. Invocar Herobrine, golpearlo y rodearlo a corta distancia. Repetir con un obstáculo que bloquee sus pasos. Debe mantener la mirada durante combate hasta finalizar el encuentro.
+
+Resultado automatizado local: compilación Java correcta, 424 comprobaciones de YAML/idioma/config y 8 de espacio físico correctas. Las pruebas de juego anteriores quedan pendientes de ejecutar dentro de Minecraft. Detalles en RELEASE-1.12.2.md.

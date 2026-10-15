@@ -1,4 +1,4 @@
-# CavesLite 1.12.0 - configuracion principal.
+# CavesLite 1.12.2 - configuracion principal.
 # Todas las criaturas y encuentros especiales vienen desactivados por defecto.
 # Activalos explicitamente desde /clite o editando este archivo.
 
@@ -124,7 +124,7 @@ boss-bar:
   # How far away (in blocks) a mob has to be to show up in the bar
   radius: 24
   # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
-  format: "&4{mob} &7cerca..."
+  format: "@lang:config.boss-bar.format"
   # "distance" -> bar fills up the closer the mob gets.
   # "health" -> bar shows the mob's remaining health instead.
   progress: distance
@@ -163,9 +163,9 @@ spawn-titles:
   fade-in-ticks: 10
   stay-ticks: 40
   fade-out-ticks: 10
-  title: "&4\u00a1Cuidado!"
+  title: "@lang:config.spawn-titles.title"
   # {mob} is replaced by the mob's name (its id, with dashes turned into spaces)
-  subtitle: "&7{mob} ha aparecido cerca"
+  subtitle: "@lang:config.spawn-titles.subtitle"
   mobs:
     alpha-spider: true
     cave-golem: true
@@ -184,7 +184,7 @@ spawn-titles:
 warnings:
   enabled: true
   radius: 10
-  message: "&7Sientes que algo te observa..."
+  message: "@lang:config.warnings.message"
   mobs:
     alpha-spider: false
     cave-golem: false
@@ -240,16 +240,16 @@ achievements:
   # kills: label shown in the title/chat, plus its own money reward (0 = none)
   thresholds:
     5:
-      label: "&6Cazador Novato"
+      label: "@lang:config.achievements.thresholds.5.label"
       reward: 25
     15:
-      label: "&6Cazador de las Profundidades"
+      label: "@lang:config.achievements.thresholds.15.label"
       reward: 75
     30:
-      label: "&4Terror de las Cuevas"
+      label: "@lang:config.achievements.thresholds.30.label"
       reward: 150
     50:
-      label: "&4Leyenda de las Cavernas"
+      label: "@lang:config.achievements.thresholds.50.label"
       reward: 300
 
 # "Who's killed the most custom mobs" leaderboards, for PlaceholderAPI
@@ -284,6 +284,10 @@ leaderboards:
     watcher: false
 
 mobs:
+  # Nether uses the same replace-mobs and world allowlist as Overworld.
+  nether:
+    ruined-portal-radius: 48
+    giant-zombie-ruined-portal-weight-multiplier: 3.0
   enabled: true
 
   # Chance of spawning custom mob instead of vanilla one
@@ -326,9 +330,11 @@ mobs:
   # Spawns cave-spiders as minions and covers player in cobweb
   alpha-spider:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     health: 18
-    name: "&4Alpha Spider"
+    name: "@lang:config.mobs.alpha-spider.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -344,8 +350,10 @@ mobs:
   # Just screams and eventually dies. What a legend
   crying-bat:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Crying Bat"
+    name: "@lang:config.mobs.crying-bat.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -361,8 +369,10 @@ mobs:
   # Places torches when it's too dark and drops some items when damaged
   dead-miner:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Dead Miner"
+    name: "@lang:config.mobs.dead-miner.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -394,8 +404,10 @@ mobs:
   # When attacks gives player all its armor
   hexed-armor:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Hexed Armor"
+    name: "@lang:config.mobs.hexed-armor.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -412,8 +424,10 @@ mobs:
   # Spawns in the dark and kills player if there's no light
   hungering-darkness:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: ""
+    name: "@lang:config.mobs.hungering-darkness.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -433,8 +447,10 @@ mobs:
   # When blows up creates a crater with magma, obsidian and lava
   lava-creeper:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Lava Creeper"
+    name: "@lang:config.mobs.lava-creeper.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -458,8 +474,10 @@ mobs:
   # Leaves a trail of magma on its way
   magma-monster:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Magma Monster"
+    name: "@lang:config.mobs.magma-monster.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -480,8 +498,10 @@ mobs:
   # Creates a smoke and gives wither effect
   smoke-demon:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: ""
+    name: "@lang:config.mobs.smoke-demon.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -498,8 +518,10 @@ mobs:
   # Spawns additional TNTs when explodes and creates small explosion when damaged
   tnt-creeper:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4TNT Creeper"
+    name: "@lang:config.mobs.tnt-creeper.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -516,8 +538,10 @@ mobs:
   # Just jumpscares a player
   watcher:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Watcher"
+    name: "@lang:config.mobs.watcher.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -533,10 +557,12 @@ mobs:
   # Becomes a chest when it has no target
   mimic:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     # Limita tanto Mimics vivos como cofres activos para evitar acumulacion.
     max-active: 1
-    name: "&4Mimic"
+    name: "@lang:config.mobs.mimic.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -566,8 +592,10 @@ mobs:
   # Has strong attack, can be damaged only with pickaxe, drops its head on death
   cave-golem:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
-    name: "&4Cave Golem"
+    name: "@lang:config.mobs.cave-golem.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -597,12 +625,14 @@ mobs:
   # Encuentros vanilla anómalos. Todos permanecen desactivados hasta que un administrador los habilite.
   giant-zombie:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: 80
     spawn-y-max: 320
     cooldown-seconds: 600
     max-active: 1
-    name: "&4Giant Zombie"
+    name: "@lang:config.mobs.giant-zombie.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -613,12 +643,14 @@ mobs:
 
   chicken-jockey:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
-    name: "&cChicken Jockey"
+    name: "@lang:config.mobs.chicken-jockey.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -630,12 +662,14 @@ mobs:
 
   killer-bunny:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
-    name: "&4The Killer Bunny"
+    name: "@lang:config.mobs.killer-bunny.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -646,12 +680,14 @@ mobs:
 
   illusioner:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
-    name: "&5Illusioner"
+    name: "@lang:config.mobs.illusioner.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -662,12 +698,14 @@ mobs:
 
   spider-jockey:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
-    name: "&4Spider Jockey"
+    name: "@lang:config.mobs.spider-jockey.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
@@ -678,12 +716,14 @@ mobs:
 
   skeleton-horseman:
     enabled: false
+    # Nether natural spawning: requires enabled above and a positive priority.
+    nether-enabled: false
     priority: 0
     spawn-y-min: -64
     spawn-y-max: 64
     cooldown-seconds: 300
     max-active: 1
-    name: "&7Skeleton Horseman"
+    name: "@lang:config.mobs.skeleton-horseman.name"
     show-name: false
     # Drops adicionales de CavesLite al morir. No reemplaza los drops vanilla ni la mecanica propia del mob.
     extra-drops: []
