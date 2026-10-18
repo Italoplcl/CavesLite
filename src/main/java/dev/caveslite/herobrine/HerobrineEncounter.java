@@ -102,6 +102,8 @@ public final class HerobrineEncounter implements Listener {
     private final Lang lang;
     private final WorldFilter worlds = new WorldFilter();
     private final Map<UUID, Active> active = new HashMap<>();
+    private final Map<UUID, Long> nextAttack = new HashMap<>();
+    private final Map<UUID, String> attackResults = new HashMap<>();
     private final Map<UUID, Long> playerCooldowns = new HashMap<>();
     private final Map<UUID, Long> nextEncounter = new HashMap<>();
 
@@ -658,19 +660,54 @@ public final class HerobrineEncounter implements Listener {
 
         // Frequent short steps make the mannequin feel alive without mob pathfinding.
         if (elapsed % 4L == 0L) stepTowardTarget(entity, target, combatStep);
-        if (distanceSq <= 2.5 * 2.5 && elapsed % combatAttackCooldownTicks < 4L) {
-            target.damage(damage, entity);
-            org.bukkit.util.Vector push = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
-            if (push.lengthSquared() > 0.001) target.setVelocity(push.normalize().multiply(combatKnockback).setY(0.28));
+        distanceSq = target.getLocation().distanceSquared(entity.getLocation());
+        if (distanceSq <= 2.5 * 2.5 && entity.hasLineOfSight(target)
+                && now >= nextAttack.getOrDefault(entity.getUniqueId(), 0L)) {
+            nextAttack.put(entity.getUniqueId(), now + combatAttackCooldownTicks);
+            double before = target.getHealth() + target.getAbsorptionAmount();
+            // A mannequin has no hostile AI: supply the attack source explicitly.
+            target.damage(damage, org.bukkit.damage.DamageSource.builder(org.bukkit.damage.DamageType.MOB_ATTACK)
+                    .withCausingEntity(entity).withDirectEntity(entity).build());
+            double dealt = Math.max(0, before - target.getHealth() - target.getAbsorptionAmount());
+            var event = target.getLastDamageCause();
+            attackResults.put(entity.getUniqueId(), "base=" + damage + ", dealt=" + dealt
+                    + ", cancelled=" + (event != null && event.isCancelled()));
+            // Do not push through cancelled damage, invulnerability or a fully blocked hit.
+            if (dealt > 0 && combatKnockback > 0) {
+                org.bukkit.util.Vector push = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
+                if (push.lengthSquared() > 0.001) target.setVelocity(push.normalize().multiply(combatKnockback).setY(0.28));
+            }
         }
     }
 
     private void stepTowardTarget(LivingEntity entity, Player target, double step) {
-        org.bukkit.util.Vector delta = target.getLocation().toVector().subtract(entity.getLocation().toVector()).setY(0);
-        if (delta.lengthSquared() < 1.0) return;
-        Location next = entity.getLocation().clone().add(delta.normalize().multiply(step));
+        Location from = entity.getLocation(), destination = target.getLocation();
+        if (from.distanceSquared(destination) < 1) return;
+        GroundRoute.Cell start = new GroundRoute.Cell(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+        GroundRoute.Cell goal = new GroundRoute.Cell(destination.getBlockX(), destination.getBlockY(), destination.getBlockZ());
+        World world = from.getWorld();
+        GroundRoute.Cell waypoint = GroundRoute.next(start, goal, cell -> {
+            if (cell.y() < world.getMinHeight() || cell.y()+2 >= world.getMaxHeight()
+                    || !world.isChunkLoaded(cell.x() >> 4, cell.z() >> 4)) return false;
+            return canOccupy(new Location(world,cell.x()+0.5,cell.y(),cell.z()+0.5));
+        }, (previous, next) -> {
+            // Check head clearance when climbing and the full drop column when descending.
+            int x = next.y()>previous.y() ? previous.x() : next.x();
+            int z = next.y()>previous.y() ? previous.z() : next.z();
+            for (int y=Math.min(previous.y(),next.y())+1; y<=Math.max(previous.y(),next.y())+1; y++) {
+                Block block=world.getBlockAt(x,y,z);
+                if (!block.isPassable() || block.isLiquid()) return false;
+            }
+            return true;
+        });
+        if (waypoint == null) return;
+        org.bukkit.util.Vector delta = new org.bukkit.util.Vector(waypoint.x()+0.5-from.getX(),0,waypoint.z()+0.5-from.getZ());
+        double length=delta.length();
+        if (length < 0.001) return;
+        Location next=from.clone().add(delta.multiply(Math.min(step,length)/length));
+        if (next.getBlockX()!=start.x() || next.getBlockZ()!=start.z()) next.setY(waypoint.y());
         if (!canOccupy(next)) return;
-        facePlayer(next, target);
+        facePlayer(next,target);
         entity.teleport(next);
     }
 
@@ -729,6 +766,8 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void cleanup(UUID id) {
+        nextAttack.remove(id);
+        attackResults.remove(id);
         Active instance = active.remove(id);
         if (instance != null) {
             BossBar bar = instance.bossBar().get();
@@ -888,7 +927,9 @@ public final class HerobrineEncounter implements Listener {
         long due = nextEncounter.computeIfAbsent(player.getUniqueId(), ignored -> now + randomEncounterDelay());
         long seconds = Math.max(0, (due - now) / 20L);
         long own = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId())).count();
-        return "Herobrine: active=" + own + ", next=" + seconds + "s, enabled=" + enabled + ", encounters=" + enabledEncounters;
+        String attack = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId()))
+                .map(a -> attackResults.getOrDefault(a.entityId(), "not attempted")).findFirst().orElse("none");
+        return "Herobrine: attack=[" + attack + "], active=" + own + ", next=" + seconds + "s, enabled=" + enabled + ", encounters=" + enabledEncounters;
     }
 
     /** Removes every active Herobrine (used on plugin disable/reload cleanup). */

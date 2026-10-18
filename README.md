@@ -1,3 +1,7 @@
+Actualización 1.12.4: Dialogs en blanco y grises; activos blancos e inactivos grises tachados. Ver RELEASE-1.12.4.md.
+
+Actualización 1.12.3: ver RELEASE-1.12.3.md para persecución entre alturas, ataques y pruebas de Herobrine.
+
 # CavesLite
 
 CavesLite es un plugin independiente para **Minecraft Java 26.3**, orientado a **Purpur/Paper** y **Java 25**. Amplía la exploración vanilla con encuentros poco comunes, criaturas especiales, Herobrine y ambientación subterránea sin convertir el servidor en un sistema RPG pesado ni depender de un resource pack.
@@ -40,7 +44,7 @@ El proyecto nació inspirado por *Dangerous Caves 2*, pero CavesLite tiene ident
 
 ## Instalación
 
-1. Compila o descarga `CavesLite-1.12.2.jar`.
+1. Compila o descarga `CavesLite-1.12.4.jar`.
 2. Colócalo en `plugins/`.
 3. Inicia el servidor para crear `plugins/CavesLite/`.
 4. Revisa `config.yml`, `dialogs.yml` y `lang/`.
@@ -76,7 +80,7 @@ El proyecto incluye GitHub Actions. También puede compilarse con JDK 25 y Gradl
 gradle build --no-daemon
 ```
 
-El JAR se genera en `build/libs/` con nombre `CavesLite-1.12.2.jar`.
+El JAR se genera en `build/libs/` con nombre `CavesLite-1.12.4.jar`.
 
 ## Documentación
 

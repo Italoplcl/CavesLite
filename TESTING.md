@@ -1,3 +1,5 @@
+Actualización 1.12.3: ver RELEASE-1.12.3.md para persecución entre alturas, ataques y pruebas de Herobrine.
+
 # CavesLite 1.11.0 — validación final
 
 Esta es la única pauta de pruebas vigente del proyecto.
@@ -90,3 +92,6 @@ Luego repetir con los encuentros que realmente se usarán en producción.
 7. Invocar Herobrine, golpearlo y rodearlo a corta distancia. Repetir con un obstáculo que bloquee sus pasos. Debe mantener la mirada durante combate hasta finalizar el encuentro.
 
 Resultado automatizado local: compilación Java correcta, 424 comprobaciones de YAML/idioma/config y 8 de espacio físico correctas. Las pruebas de juego anteriores quedan pendientes de ejecutar dentro de Minecraft. Detalles en RELEASE-1.12.2.md.
+
+
+1.12.4: revisar todos los Dialogs en es/en; nombres activos blancos e inactivos grises tachados; títulos, etiquetas y botones sin colores saturados, incluidos nombres personalizados y archivos de versiones anteriores. Probar Guardar, Invocar y Eliminar como antes. Ver RELEASE-1.12.4.md.

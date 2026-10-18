@@ -1,6 +1,8 @@
-# CavesLite 1.12.2 - apariencia de los paneles administrativos
+# CavesLite 1.12.4 - apariencia de los paneles administrativos
 # Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
-# Los colores usan el formato legacy de Minecraft (&a, &c, &l, etc.).
+# Paleta de texto: blanco y grises. Activos blancos; inactivos grises tachados.
+# Los nombres del panel principal muestran el estado automaticamente.
+# main.active-prefix/main.inactive-prefix se conservan por compatibilidad con archivos anteriores.
 main:
   title: "@lang:dialogs.main.title"
   description: "@lang:dialogs.main.description"
