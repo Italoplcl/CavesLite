@@ -22,7 +22,7 @@ import java.util.Map;
 
 /** /clite - CavesLite administration. */
 public final class CavesCommand implements CommandExecutor, TabCompleter {
-    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "herobrine", "kill", "kills", "options", "debug", "reload");
+    private static final List<String> SUBCOMMANDS = List.of("list", "summon", "kill", "kills", "options", "debug", "reload");
 
     private final CavesLite plugin;
     private final MobManager mobs;
@@ -58,19 +58,18 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "debug" -> {
-                if (args.length < 2 || !args[1].equalsIgnoreCase("mobs")) {
-                    Text.send(sender, plugin.getLanguage().get("cavescommand.text-2") + label + " debug mobs [mob]");
-                } else {
+                if (args.length >= 2 && args[1].equalsIgnoreCase("herobrine")) {
+                    debugHerobrine(sender, args.length >= 3 ? args[2] : null, label);
+                } else if (args.length >= 2 && args[1].equalsIgnoreCase("mobs")) {
                     String filter = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : null;
                     if (filter != null && mobs.getMob(filter) == null) {
-                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-3") + filter);
+                        send(sender,"command.summon-unknown-mob",Map.of("mob",filter,"mobs",String.join(", ",mobs.getMobIds())));
                     } else {
-                        List<String> lines = mobs.debugMobLines(filter);
-                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-4"));
-                        for (String line : lines) Text.send(sender, "&7" + line);
-                        Text.send(sender, plugin.getLanguage().get("cavescommand.text-5"));
+                        Text.send(sender,lang.get("cavescommand.text-4"));
+                        for (String line : mobs.debugMobLines(filter)) Text.send(sender,"&7"+line);
+                        Text.send(sender,lang.get("cavescommand.text-5"));
                     }
-                }
+                } else send(sender,"command.debug-usage",Map.of("label",label));
             }
 
             case "kill" -> {
@@ -94,12 +93,11 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
 
             case "summon", "spawn" -> summon(sender, label, args);
 
+            // Legacy spelling remains an alias; help and completion use /clite debug herobrine.
             case "herobrine" -> {
                 if (args.length >= 2 && args[1].equalsIgnoreCase("debug")) {
-                    Player target = args.length >= 3 ? Bukkit.getPlayer(args[2]) : sender instanceof Player p ? p : null;
-                    if (target == null) Text.send(sender, plugin.getLanguage().get("cavescommand.text-6") + label + lang.get("command.herobrine-debug-player"));
-                    else Text.send(sender, "&7" + plugin.getHerobrine().debug(target));
-                } else Text.send(sender, plugin.getLanguage().get("cavescommand.text-7") + label + lang.get("command.herobrine-debug"));
+                    debugHerobrine(sender,args.length>=3?args[2]:null,label);
+                } else send(sender,"command.debug-usage",Map.of("label",label));
             }
 
             case "kills" -> {
@@ -161,8 +159,16 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
             send(sender, "command.summon-specify-coords", Map.of("label", label, "mob", type));
             return;
         }
-        mobs.spawn(type, loc);
+        if (mobs.spawn(type, loc) == null) {
+            send(sender,"command.summon-no-space",null); return;
+        }
         send(sender, "command.summon-success", Map.of("mob", type));
+    }
+
+    private void debugHerobrine(CommandSender sender, String name, String label) {
+        Player target = name == null ? (sender instanceof Player player ? player : null) : Bukkit.getPlayerExact(name);
+        if (target == null) send(sender,"command.debug-herobrine-player",Map.of("label",label));
+        else Text.send(sender,"&7"+plugin.getHerobrine().debug(target));
     }
 
     /** No arguments -> the player's own position; otherwise "x y z [world]". */
@@ -189,7 +195,9 @@ public final class CavesCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             options.addAll(SUBCOMMANDS);
         } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
-            options.add("mobs");
+            options.addAll(List.of("mobs","herobrine"));
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("debug") && args[1].equalsIgnoreCase("herobrine")) {
+            for (Player player : Bukkit.getOnlinePlayers()) options.add(player.getName());
         } else if (args.length == 3 && args[0].equalsIgnoreCase("debug") && args[1].equalsIgnoreCase("mobs")) {
             options.addAll(mobs.getMobIds());
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("summon") || args[0].equalsIgnoreCase("kill"))) {

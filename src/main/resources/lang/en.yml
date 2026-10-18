@@ -3,13 +3,16 @@
 # as in config.yml.
 
 command:
+  debug-usage: "&7Usage: /{label} debug <mobs [mob]|herobrine [player]>"
+  debug-herobrine-player: "&7Specify an online player: /{label} debug herobrine <player>"
+  summon-no-space: "&7Cannot summon: insufficient physical space for this creature."
   herobrine-debug-player: " herobrine debug <player>"
   herobrine-debug: " herobrine debug [player]"
   herobrine-summon: " summon herobrine <player> [type]"
   list: "&7Custom mobs: &f{mobs}"
   reload: "&aConfig reloaded."
   kill-removed: "&aRemoved &e{amount}&a custom mob(s)."
-  usage: "&7Usage: &f/{label} <list|summon|herobrine|kill|kills|options|debug|reload>"
+  usage: "&7Usage: /{label} <list|summon|kill|kills|options|debug|reload>"
   kills-specify-player: "&cSpecify an online player: &f/{label} kills <player>"
   kills-result: "&7{player}&7's custom mob kills: &e{amount}"
   summon-specify-mob: "&cSpecify a mob: &f/{label} summon <mob>"
@@ -31,7 +34,7 @@ admindialogs:
   text-4: "&fInactive"
   text-5: "&f&lCavesLite"
   text-6: "&7Creatures, encounters and tools"
-  text-7: "&7Changes apply when saved. Advanced settings: &fconfig.yml&7. See &fDOCUMENTATION.md&7."
+  text-7: "&7Changes apply when saved. Advanced settings: &fconfig.yml&7. See &fdocs/CONFIGURATION.en.md&7."
   text-8: "&f&lCavesLite &8- &fOptions"
   text-9: "&fAmbient sounds"
   text-10: "&fGhost footsteps"
@@ -141,7 +144,7 @@ cavescommand:
   text-6: "&cUse /"
   text-7: "&7Usage: /"
   text-8: "&cUse /"
-  text-9: "&cCould not summon Herobrine. Check the type and available loaded safe positions."
+  text-9: "&7Could not summon Herobrine: check the type, safe space and the player active-encounter limit."
   text-10: "&aHerobrine summoned near &e"
 mobachievements:
   text-1: "&6Achievement unlocked!"
@@ -150,8 +153,6 @@ dialogs:
   main:
     title: "&f&lCavesLite"
     description: "&7Creatures, encounters and administration tools"
-    active-prefix: "&f"
-    inactive-prefix: "&7&m"
     herobrine-label: "&fHerobrine"
   mob:
     title-prefix: "&f&l"
@@ -172,7 +173,7 @@ dialogs:
       maxactive: "&7Global active cap (0 = unlimited)"
   options:
     title: "&f&lCavesLite &8- &fOptions"
-    description: "&7Enable or disable global systems. Advanced settings: config.yml / DOCUMENTATION.md"
+    description: "&7Enable or disable global systems. Advanced settings: config.yml / docs/CONFIGURATION.en.md"
     saved: "&fGlobal options updated."
     labels:
       ambient: "&fAmbient sounds"
@@ -249,3 +250,20 @@ achievement:
   kills-suffix: " kills)"
 debug:
   loaded: "loaded"
+
+giant-ui:
+  movement: "&fChase"
+  basic: "&fBasic attack"
+  stomp: "&fStomp"
+  quake: "&fEarthquake"
+  minions: "&fZombie reinforcements"
+  loot: "&fCustom loot"
+  speed: "&fMovement speed"
+  basic-damage: "&fBasic damage"
+  stomp-damage: "&fStomp damage"
+  quake-damage: "&fEarthquake damage"
+  stomp-radius: "&fStomp radius"
+  quake-radius: "&fEarthquake radius"
+  stomp-cooldown: "&fStomp cooldown (ticks)"
+  quake-cooldown: "&fEarthquake cooldown (ticks)"
+  minion-cap: "&fActive reinforcement cap"

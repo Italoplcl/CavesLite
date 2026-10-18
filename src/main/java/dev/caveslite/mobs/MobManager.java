@@ -128,7 +128,12 @@ public final class MobManager implements Listener {
     }
 
     public LivingEntity spawn(CustomMob mob, Location loc) {
+        if (mob.id().equals("giant-zombie") && !mob.canSpawn(loc)) return null;
         LivingEntity entity = mob.spawn(loc);
+        if (entity == null || !entity.isValid()) return null;
+        if (mob.id().equals("giant-zombie") && !dev.caveslite.util.BodySpace.fits(loc, entity.getWidth(), entity.getHeight())) {
+            entity.remove(); return null;
+        }
         activeByMob.get(mob.id()).add(entity.getUniqueId());
         if (mob instanceof CustomMob.Ticking ticking) {
             tracked.get(ticking).add(entity.getUniqueId());
@@ -184,16 +189,27 @@ public final class MobManager implements Listener {
         if (mob.cooldownMillis() > 0 && now - lastNaturalSpawn.getOrDefault(mob.id(), 0L) < mob.cooldownMillis()) return;
         if (mob.maxActive() > 0 && countActive(mob.id()) >= mob.maxActive()) return;
 
-        event.setCancelled(true);
-        spawn(mob, loc);
-        lastNaturalSpawn.put(mob.id(), now);
+        if (spawn(mob, loc) != null) {
+            event.setCancelled(true);
+            lastNaturalSpawn.put(mob.id(), now);
+        }
     }
+
+    public boolean canReleaseFromBlock(CustomMob mob) {
+        return enabled && mob.enabled() && (mob.maxActive() <= 0 || countActive(mob.id()) < mob.maxActive())
+                && System.currentTimeMillis() - lastNaturalSpawn.getOrDefault(mob.id(), 0L) >= mob.cooldownMillis();
+    }
+    public void recordBlockRelease(CustomMob mob) { lastNaturalSpawn.put(mob.id(), System.currentTimeMillis()); }
 
     private int countActive(String id) {
         Set<UUID> ids = activeByMob.get(id);
         if (ids == null) return 0;
-        ids.removeIf(uuid -> { Entity e = Bukkit.getEntity(uuid); return e != null && !e.isValid(); });
-        return ids.size();
+        ids.removeIf(uuid -> { Entity e = Bukkit.getEntity(uuid); return e == null || !e.isValid(); });
+        return (int) ids.stream().map(Bukkit::getEntity).filter(entity -> {
+            if (entity == null) return false;
+            Entity vehicle = entity.getVehicle();
+            return !(vehicle instanceof LivingEntity living) || !id.equals(TagHelper.getTag(living));
+        }).count();
     }
 
     // ----------------------------------------------------------------- ticking

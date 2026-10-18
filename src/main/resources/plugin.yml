@@ -1,7 +1,7 @@
 name: CavesLite
 version: '${version}'
 main: dev.caveslite.CavesLite
-api-version: '26.1'
+api-version: '26.3'
 description: Lightweight vanilla-style anomalies, encounters, cave ambience and custom creatures for modern Minecraft.
 author: Italo
 softdepend: [Vault, PlaceholderAPI]
@@ -9,7 +9,7 @@ commands:
   clite:
     aliases: [caveslite]
     description: Manage CavesLite encounters and options
-    usage: /<command> [list|summon|herobrine|kill|kills|options|debug|reload]
+    usage: /<command> [list|summon|kill|kills|options|debug|reload]
     permission: caveslite.command
 permissions:
   caveslite.command:

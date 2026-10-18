@@ -56,7 +56,7 @@ final class NetherSpawns {
                 if (!world.isChunkLoaded(x >> 4, z >> 4)) return false;
                 for (int y = (int)Math.floor(body.getMinY()); y < Math.ceil(body.getMaxY()); y++) {
                     var block = world.getBlockAt(x, y, z);
-                    if (block.isLiquid() || block.getCollisionShape().overlaps(body)) return false;
+                    if (block.isLiquid() || block.getCollisionShape().overlaps(body.clone().shift(-x, -y, -z))) return false;
                 }
             }
         return true;

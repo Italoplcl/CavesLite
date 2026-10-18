@@ -96,12 +96,20 @@ public final class HerobrineEncounter implements Listener {
             java.util.concurrent.atomic.AtomicBoolean sneakyStrikeDone,
             java.util.concurrent.atomic.AtomicBoolean escaping,
             java.util.concurrent.atomic.AtomicLong escapeStartTick
-    ) {}
+    ) {
+        Active withTarget(UUID player) {
+            return new Active(entityId,type,spawnTick,torchesLeft,nextTorchTick,lookStartTick,inCombat,
+                    combatStartTick,bossBar,player,spotted,sneakyStrikeDone,escaping,escapeStartTick);
+        }
+    }
 
     private final Plugin plugin;
     private final Lang lang;
     private final WorldFilter worlds = new WorldFilter();
     private final Map<UUID, Active> active = new HashMap<>();
+    private int maxPerPlayer = 1;
+    private boolean netherEnabled;
+    private final EncounterClock clock = new EncounterClock(System::nanoTime);
     private final Map<UUID, Long> nextAttack = new HashMap<>();
     private final Map<UUID, String> attackResults = new HashMap<>();
     private final Map<UUID, Long> playerCooldowns = new HashMap<>();
@@ -155,7 +163,11 @@ public final class HerobrineEncounter implements Listener {
     }
 
     public void reload(ConfigurationSection cfg) {
+        boolean previouslyEnabled = enabled;
+        long previousMin = intervalMinTicks, previousMax = intervalMaxTicks;
         enabled = cfg.getBoolean("enabled", true);
+        maxPerPlayer = Math.max(1, cfg.getInt("max-active-per-player", 1));
+        netherEnabled = cfg.getBoolean("nether-enabled", false);
         worlds.reload(cfg.getStringList("worlds"));
         yMin = cfg.getInt("y-min", -64);
         yMax = cfg.getInt("y-max", 320);
@@ -163,6 +175,7 @@ public final class HerobrineEncounter implements Listener {
         ConfigurationSection interval = cfg.getConfigurationSection("encounter-interval");
         intervalMinTicks = Math.max(30, interval != null ? interval.getLong("min-seconds", 480) : 480) * 20L;
         intervalMaxTicks = Math.max(intervalMinTicks, Math.max(60, interval != null ? interval.getLong("max-seconds", 1200) : 1200) * 20L);
+        if (previouslyEnabled != enabled || previousMin != intervalMinTicks || previousMax != intervalMaxTicks) nextEncounter.clear();
         minDistance = cfg.getDouble("min-distance-from-player", 10);
         maxDistance = Math.max(minDistance + 1, cfg.getDouble("max-distance-from-player", 24));
         minDistanceBetween = cfg.getDouble("min-distance-between-instances", 32);
@@ -247,7 +260,7 @@ public final class HerobrineEncounter implements Listener {
         ConfigurationSection combat = cfg.getConfigurationSection("combat");
         combatEnabled = combat == null || combat.getBoolean("enabled", true);
         combatBossBarEnabled = combat != null && combat.getBoolean("bossbar-enabled", false);
-        combatMaxDurationTicks = Math.max(1, combat != null ? combat.getLong("max-duration-seconds", 60) : 60) * 20L;
+        combatMaxDurationTicks = EncounterClock.secondsToTicks(combat != null ? combat.getLong("max-duration-seconds", 60) : 60);
         fleeHealthFraction = combat != null ? combat.getDouble("flee-health-fraction", 0.35) : 0.35;
         fleeSpeedAmplifier = combat != null ? combat.getInt("flee-speed-amplifier", 2) : 2;
 
@@ -258,7 +271,7 @@ public final class HerobrineEncounter implements Listener {
         combatStep = combat != null ? Math.max(0.1, combat.getDouble("chase-step-blocks", 0.55)) : 0.55;
         fleeStep = combat != null ? Math.max(0.2, combat.getDouble("flee-step-blocks", 1.05)) : 1.05;
         combatAttackCooldownTicks = Math.max(8, combat != null ? combat.getLong("attack-cooldown-ticks", 24) : 24);
-        fleeDurationTicks = Math.max(20, combat != null ? combat.getLong("flee-duration-seconds", 4) : 4) * 20L;
+        fleeDurationTicks = EncounterClock.secondsToTicks(combat != null ? combat.getLong("flee-duration-seconds", 4) : 4);
         maxChaseDistance = cfg.getDouble("max-chase-distance", 20);
 
         ConfigurationSection reward = cfg.getConfigurationSection("reward");
@@ -273,12 +286,13 @@ public final class HerobrineEncounter implements Listener {
     /** Called periodically (see check-interval in CavesLite) - tries a spawn roll for each online player. */
     public void trySpawns() {
         if (!enabled) return;
-        long now = firstWorldTime();
+        long now = encounterTime();
 
         for (World world : Bukkit.getWorlds()) {
-            if (world.getEnvironment() == World.Environment.THE_END || !worlds.allows(world)) continue;
+            if (world.getEnvironment() == World.Environment.THE_END || (world.getEnvironment() == World.Environment.NETHER && !netherEnabled) || !worlds.allows(world)) continue;
             for (Player player : world.getPlayers()) {
                 UUID pid = player.getUniqueId();
+                if (activeFor(pid) >= maxPerPlayer) continue;
                 Long cooldown = playerCooldowns.get(pid);
                 if (cooldown != null && now < cooldown) continue;
                 long due = nextEncounter.computeIfAbsent(pid, ignored -> now + randomEncounterDelay());
@@ -292,7 +306,12 @@ public final class HerobrineEncounter implements Listener {
         }
     }
 
+    private long activeFor(UUID player) {
+        return active.values().stream().filter(a -> a.targetPlayerId().equals(player)).count();
+    }
+
     private boolean trySpawnNear(Player player, long now) {
+        if (activeFor(player.getUniqueId()) >= maxPerPlayer) return false;
         EncounterType type = pickEncounterType(player);
         if (type == null) return false;
 
@@ -528,7 +547,7 @@ public final class HerobrineEncounter implements Listener {
     /** Called frequently (every few ticks) for the observation/vanish/torch/stop-message behaviour. */
     public void tick() {
         if (active.isEmpty()) return;
-        long now = firstWorldTime();
+        long now = encounterTime();
 
         for (UUID id : new ArrayList<>(active.keySet())) {
             Active instance = active.get(id);
@@ -546,9 +565,8 @@ public final class HerobrineEncounter implements Listener {
         }
     }
 
-    private long firstWorldTime() {
-        List<World> worldsList = Bukkit.getWorlds();
-        return worldsList.isEmpty() ? 0 : worldsList.get(0).getFullTime();
+    private long encounterTime() {
+        return clock.ticks();
     }
 
     private void tickIdle(LivingEntity entity, Active instance, long now) {
@@ -631,11 +649,6 @@ public final class HerobrineEncounter implements Listener {
             endCombat(instance); vanish(entity, instance); return;
         }
 
-        // Track independently of movement, including close range and blocked steps.
-        Location facing = entity.getLocation();
-        facePlayer(facing, target);
-        entity.setRotation(facing.getYaw(), facing.getPitch());
-
         long elapsed = now - instance.combatStartTick().get();
         double fraction = entity.getHealth() / Math.max(1, health);
         if (!instance.escaping().get() && (elapsed >= combatMaxDurationTicks || fraction <= fleeHealthFraction)) {
@@ -649,9 +662,18 @@ public final class HerobrineEncounter implements Listener {
                     target.getLocation().distanceSquared(entity.getLocation()) > maxChaseDistance * maxChaseDistance * 2.25) {
                 endCombat(instance); vanish(entity, instance); return;
             }
+            // Track even when the escape route is blocked.
+            Location facing = entity.getLocation();
+            facePlayer(facing, target);
+            entity.setRotation(facing.getYaw(), facing.getPitch());
             stepAwayFromTarget(entity, target, fleeStep);
             return;
         }
+
+        // Track independently of movement, including close range and blocked steps.
+        Location facing = entity.getLocation();
+        facePlayer(facing, target);
+        entity.setRotation(facing.getYaw(), facing.getPitch());
 
         double distanceSq = target.getLocation().distanceSquared(entity.getLocation());
         if (distanceSq > maxChaseDistance * maxChaseDistance) {
@@ -659,7 +681,7 @@ public final class HerobrineEncounter implements Listener {
         }
 
         // Frequent short steps make the mannequin feel alive without mob pathfinding.
-        if (elapsed % 4L == 0L) stepTowardTarget(entity, target, combatStep);
+        stepTowardTarget(entity, target, combatStep);
         distanceSq = target.getLocation().distanceSquared(entity.getLocation());
         if (distanceSq <= 2.5 * 2.5 && entity.hasLineOfSight(target)
                 && now >= nextAttack.getOrDefault(entity.getUniqueId(), 0L)) {
@@ -759,10 +781,12 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void vanish(LivingEntity entity, Active instance) {
-        Locations.playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE, 0.6f, 0.6f);
-        entity.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, entity.getLocation().add(0, 1, 0), 15, 0.3, 0.5, 0.3, 0.01);
+        Location last = entity.getLocation();
+        // Removal must not depend on optional sound/particle effects succeeding.
         cleanup(instance.entityId());
         entity.remove();
+        Locations.playSound(last, Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE, 0.6f, 0.6f);
+        last.getWorld().spawnParticle(org.bukkit.Particle.SMOKE, last.clone().add(0, 1, 0), 15, 0.3, 0.5, 0.3, 0.01);
     }
 
     private void cleanup(UUID id) {
@@ -839,8 +863,14 @@ public final class HerobrineEncounter implements Listener {
     }
 
     private void startCombat(LivingEntity entity, Active instance, Player attacker) {
+        if (!instance.targetPlayerId().equals(attacker.getUniqueId())) {
+            if (activeFor(attacker.getUniqueId()) >= maxPerPlayer) { vanish(entity, instance); return; }
+            instance = instance.withTarget(attacker.getUniqueId());
+            active.put(entity.getUniqueId(), instance);
+        }
+        nextAttack.remove(entity.getUniqueId());
         instance.inCombat().set(true);
-        instance.combatStartTick().set(firstWorldTime());
+        instance.combatStartTick().set(encounterTime());
         instance.escaping().set(false);
         instance.escapeStartTick().set(0);
         entity.setInvulnerable(false);
@@ -896,7 +926,7 @@ public final class HerobrineEncounter implements Listener {
 
         if (instance != null) {
             endCombat(instance);
-            active.remove(dead.getUniqueId());
+            cleanup(dead.getUniqueId());
         }
     }
 
@@ -905,10 +935,11 @@ public final class HerobrineEncounter implements Listener {
     }
 
     public boolean summonFor(Player target, String requestedType) {
+        if (activeFor(target.getUniqueId()) >= maxPerPlayer) return false;
         EncounterType type;
         try { type = requestedType == null ? EncounterType.STALKING : EncounterType.valueOf(requestedType.toUpperCase(Locale.ROOT)); }
         catch (IllegalArgumentException ex) { return false; }
-        long now = firstWorldTime();
+        long now = encounterTime();
         Location spot = findEncounterSpot(target, type);
         if (spot == null || isNearProtectedStructure(spot)) return false;
         LivingEntity entity = spawn(spot);
@@ -923,13 +954,18 @@ public final class HerobrineEncounter implements Listener {
     }
 
     public String debug(Player player) {
-        long now = firstWorldTime();
+        long now = encounterTime();
         long due = nextEncounter.computeIfAbsent(player.getUniqueId(), ignored -> now + randomEncounterDelay());
         long seconds = Math.max(0, (due - now) / 20L);
         long own = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId())).count();
         String attack = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId()))
                 .map(a -> attackResults.getOrDefault(a.entityId(), "not attempted")).findFirst().orElse("none");
-        return "Herobrine: attack=[" + attack + "], active=" + own + ", next=" + seconds + "s, enabled=" + enabled + ", encounters=" + enabledEncounters;
+        String state = active.values().stream().filter(a -> a.targetPlayerId().equals(player.getUniqueId()))
+                .map(a -> "combat=" + a.inCombat().get() + ", fleeing=" + a.escaping().get()
+                        + ", combatSeconds=" + (a.inCombat().get() ? Math.max(0,now-a.combatStartTick().get())/20 : 0)
+                        + ", fleeSeconds=" + (a.escaping().get() ? Math.max(0,now-a.escapeStartTick().get())/20 : 0))
+                .findFirst().orElse("none");
+        return "Herobrine: state=[" + state + "], attack=[" + attack + "], active=" + own + ", next=" + seconds + "s, enabled=" + enabled + ", encounters=" + enabledEncounters;
     }
 
     /** Removes every active Herobrine (used on plugin disable/reload cleanup). */

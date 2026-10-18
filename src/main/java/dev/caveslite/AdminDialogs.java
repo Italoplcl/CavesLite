@@ -145,13 +145,30 @@ public final class AdminDialogs {
                             saveSpecific(view,id,path); plugin.getConfig().set(dropPath,parseList(view.getText("drops"))); plugin.getConfig().set(path+"death-command.enabled",yes(view.getBoolean("deathcmd"))); plugin.getConfig().set(path+"death-command.command",view.getText("deathcommand"));
                             saveReload(); p.sendMessage(DialogText.component(plugin.getLanguage().get("admindialogs.text-35")+configuredName(id)));
                         }),
-                        button(ui.getString("mob.buttons.summon",plugin.getLanguage().get("admindialogs.text-36")),(view,audience)->{if(audience instanceof Player p)mobs.spawn(id,p.getLocation());}),
+                        button(ui.getString("mob.buttons.summon",plugin.getLanguage().get("admindialogs.text-36")),(view,audience)->{if(audience instanceof Player p && mobs.spawn(id,p.getLocation())==null)p.sendMessage(DialogText.component(plugin.getLanguage().get("command.summon-no-space")));}),
                         button(ui.getString("mob.buttons.remove",plugin.getLanguage().get("admindialogs.text-37")),(view,audience)->{if(audience instanceof Player p){int n=mobs.killAll(e->dev.caveslite.util.TagHelper.isTagged(e,id));n+=mobs.cleanupArtifacts(id);p.sendMessage(DialogText.component(plugin.getLanguage().get("admindialogs.text-38")+n));}})
                 )).columns(3).build())); player.showDialog(dialog);
     }
 
     private void addSpecificInputs(List<DialogInput> in,String id,String p){
         switch(id){
+            case "giant-zombie" -> {
+                in.add(bool("giantmove","",plugin.getLanguage().get("giant-ui.movement"),plugin.getConfig().getBoolean(p+"movement.enabled",true)));
+                in.add(bool("giantbasic","",plugin.getLanguage().get("giant-ui.basic"),plugin.getConfig().getBoolean(p+"attacks.basic.enabled",true)));
+                in.add(bool("giantstomp","",plugin.getLanguage().get("giant-ui.stomp"),plugin.getConfig().getBoolean(p+"attacks.stomp.enabled",true)));
+                in.add(bool("giantquake","",plugin.getLanguage().get("giant-ui.quake"),plugin.getConfig().getBoolean(p+"attacks.quake.enabled",true)));
+                in.add(bool("giantminions","",plugin.getLanguage().get("giant-ui.minions"),plugin.getConfig().getBoolean(p+"reinforcements.enabled",true)));
+                in.add(bool("giantloot","",plugin.getLanguage().get("giant-ui.loot"),plugin.getConfig().getBoolean(p+"loot.enabled",true)));
+                in.add(DialogInput.numberRange("giantspeed",DialogText.component(plugin.getLanguage().get("giant-ui.speed")),0.01f,0.5f).step(0.01f).initial((float)plugin.getConfig().getDouble(p+"movement.speed",0.23)).build());
+                in.add(range("giantbasicdamage",plugin.getLanguage().get("giant-ui.basic-damage"),0,100,plugin.getConfig().getDouble(p+"attacks.basic.damage",6)));
+                in.add(range("giantstompdamage",plugin.getLanguage().get("giant-ui.stomp-damage"),0,100,plugin.getConfig().getDouble(p+"attacks.stomp.damage",8)));
+                in.add(range("giantquakedamage",plugin.getLanguage().get("giant-ui.quake-damage"),0,100,plugin.getConfig().getDouble(p+"attacks.quake.damage",6)));
+                in.add(range("giantstompradius",plugin.getLanguage().get("giant-ui.stomp-radius"),1,16,plugin.getConfig().getDouble(p+"attacks.stomp.radius",4.5)));
+                in.add(range("giantquakeradius",plugin.getLanguage().get("giant-ui.quake-radius"),1,16,plugin.getConfig().getDouble(p+"attacks.quake.radius",8)));
+                in.add(range("giantstompcd",plugin.getLanguage().get("giant-ui.stomp-cooldown"),8,1200,plugin.getConfig().getDouble(p+"attacks.stomp.cooldown-ticks",200)));
+                in.add(range("giantquakecd",plugin.getLanguage().get("giant-ui.quake-cooldown"),8,1200,plugin.getConfig().getDouble(p+"attacks.quake.cooldown-ticks",360)));
+                in.add(range("giantminionmax",plugin.getLanguage().get("giant-ui.minion-cap"),1,12,plugin.getConfig().getDouble(p+"reinforcements.max-active",3)));
+            }
             case "alpha-spider" -> { in.add(range("cobweb",plugin.getLanguage().get("admindialogs.text-39"),0,100,plugin.getConfig().getDouble(p+"cobweb-chance",14.29))); in.add(range("minion",plugin.getLanguage().get("admindialogs.text-40"),0,100,plugin.getConfig().getDouble(p+"minion-chance",6.67))); }
             case "crying-bat" -> { in.add(range("cry",plugin.getLanguage().get("admindialogs.text-41"),0,100,plugin.getConfig().getDouble(p+"cry-chance",3.33))); in.add(range("death",plugin.getLanguage().get("admindialogs.text-42"),0,100,plugin.getConfig().getDouble(p+"death-chance",20))); }
             case "dead-miner" -> { in.add(bool("target","",plugin.getLanguage().get("admindialogs.text-43"),plugin.getConfig().getBoolean(p+"requires-target",true))); in.add(bool("torches","",plugin.getLanguage().get("admindialogs.text-44"),plugin.getConfig().getBoolean(p+"place-torches",true))); in.add(bool("redtorches","",plugin.getLanguage().get("admindialogs.text-45"),plugin.getConfig().getBoolean(p+"red-torches",false))); in.add(range("dropchance",plugin.getLanguage().get("admindialogs.text-46"),0,100,plugin.getConfig().getDouble(p+"drop-chance",30))); in.add(range("torchcooldown",plugin.getLanguage().get("admindialogs.text-47"),0,300,plugin.getConfig().getInt(p+"torches-cooldown",12))); in.add(DialogInput.text("headvalue",DialogText.component(plugin.getLanguage().get("admindialogs.text-48"))).initial(plugin.getConfig().getString(p+"head-value","")).maxLength(8192).build()); }
@@ -171,6 +188,23 @@ public final class AdminDialogs {
 
     private void saveSpecific(DialogResponseView v,String id,String p){
         switch(id){
+            case "giant-zombie" -> {
+                plugin.getConfig().set(p+"movement.enabled",yes(v.getBoolean("giantmove")));
+                plugin.getConfig().set(p+"attacks.basic.enabled",yes(v.getBoolean("giantbasic")));
+                plugin.getConfig().set(p+"attacks.stomp.enabled",yes(v.getBoolean("giantstomp")));
+                plugin.getConfig().set(p+"attacks.quake.enabled",yes(v.getBoolean("giantquake")));
+                plugin.getConfig().set(p+"reinforcements.enabled",yes(v.getBoolean("giantminions")));
+                plugin.getConfig().set(p+"loot.enabled",yes(v.getBoolean("giantloot")));
+                setNum(p+"movement.speed",v,"giantspeed");
+                setNum(p+"attacks.basic.damage",v,"giantbasicdamage");
+                setNum(p+"attacks.stomp.damage",v,"giantstompdamage");
+                setNum(p+"attacks.quake.damage",v,"giantquakedamage");
+                setNum(p+"attacks.stomp.radius",v,"giantstompradius");
+                setNum(p+"attacks.quake.radius",v,"giantquakeradius");
+                setNum(p+"attacks.stomp.cooldown-ticks",v,"giantstompcd");
+                setNum(p+"attacks.quake.cooldown-ticks",v,"giantquakecd");
+                setNum(p+"reinforcements.max-active",v,"giantminionmax");
+            }
             case "alpha-spider" -> {setNum(p+"cobweb-chance",v,"cobweb");setNum(p+"minion-chance",v,"minion");}
             case "crying-bat" -> {setNum(p+"cry-chance",v,"cry");setNum(p+"death-chance",v,"death");}
             case "dead-miner" -> {plugin.getConfig().set(p+"requires-target",yes(v.getBoolean("target")));plugin.getConfig().set(p+"place-torches",yes(v.getBoolean("torches")));plugin.getConfig().set(p+"red-torches",yes(v.getBoolean("redtorches")));setNum(p+"drop-chance",v,"dropchance");setNum(p+"torches-cooldown",v,"torchcooldown");plugin.getConfig().set(p+"head-value",v.getText("headvalue"));}

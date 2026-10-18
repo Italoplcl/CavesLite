@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.caveslite"
-version = "1.12.4"
+version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -45,3 +45,26 @@ tasks.jar {
     archiveBaseName.set("CavesLite")
     from("LICENSE")
 }
+
+
+// Lightweight verification mains live outside production sources and are never packed into the JAR.
+val verification = sourceSets.create("verification") {
+    java.srcDir("tools/verification")
+    compileClasspath += sourceSets.main.get().output + configurations.compileClasspath.get()
+    runtimeClasspath += output + compileClasspath
+}
+val verifyPreview = tasks.register("verifyPreview")
+listOf(
+    "VerifyRelease", "VerifyEncounterClock", "VerifyHerobrineRoute",
+    "VerifyDialogPalette", "VerifyGiantPreview", "dev.caveslite.mobs.VerifyNetherSpace"
+).forEach { verifier ->
+    val task = tasks.register<JavaExec>("run" + verifier.substringAfterLast('.')) {
+        dependsOn(tasks.named(verification.classesTaskName))
+        classpath = verification.runtimeClasspath
+        mainClass.set(verifier)
+        args(project.projectDir.absolutePath)
+        javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(25)) })
+    }
+    verifyPreview.configure { dependsOn(task) }
+}
+tasks.check { dependsOn(verifyPreview) }
