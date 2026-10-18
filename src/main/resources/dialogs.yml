@@ -1,14 +1,11 @@
-# CavesLite 1.12.4 - apariencia de los paneles administrativos
+# CavesLite 2.0.0-preview.1 - apariencia de los paneles administrativos
 # Puedes cambiar textos, colores, simbolos, columnas y materiales sin recompilar.
 # Paleta de texto: blanco y grises. Activos blancos; inactivos grises tachados.
 # Los nombres del panel principal muestran el estado automaticamente.
-# main.active-prefix/main.inactive-prefix se conservan por compatibilidad con archivos anteriores.
 main:
   title: "@lang:dialogs.main.title"
   description: "@lang:dialogs.main.description"
   columns: 3
-  active-prefix: "@lang:dialogs.main.active-prefix"
-  inactive-prefix: "@lang:dialogs.main.inactive-prefix"
   decorative-item: SCULK_CATALYST
   herobrine-label: "@lang:dialogs.main.herobrine-label"
 

@@ -3,13 +3,16 @@
 # color (&a, &4, etc.) funcionan igual que en config.yml.
 
 command:
+  debug-usage: "&7Uso: /{label} debug <mobs [mob]|herobrine [jugador]>"
+  debug-herobrine-player: "&7Indica un jugador conectado: /{label} debug herobrine <jugador>"
+  summon-no-space: "&7No se pudo invocar: falta espacio físico suficiente para la criatura."
   herobrine-debug-player: " herobrine debug <jugador>"
   herobrine-debug: " herobrine debug [jugador]"
   herobrine-summon: " summon herobrine <jugador> [tipo]"
   list: "&7Mobs personalizados: &f{mobs}"
   reload: "&aConfiguración recargada."
   kill-removed: "&aSe eliminaron &e{amount}&a mob(s) personalizado(s)."
-  usage: "&7Uso: &f/{label} <list|summon|herobrine|kill|kills|options|debug|reload>"
+  usage: "&7Uso: /{label} <list|summon|kill|kills|options|debug|reload>"
   kills-specify-player: "&cIndica un jugador conectado: &f/{label} kills <jugador>"
   kills-result: "&7Muertes de mobs personalizados de {player}&7: &e{amount}"
   summon-specify-mob: "&cIndica un mob: &f/{label} summon <mob>"
@@ -31,7 +34,7 @@ admindialogs:
   text-4: "&fInactivo"
   text-5: "&f&lCavesLite"
   text-6: "&7Criaturas, encuentros y herramientas"
-  text-7: "&7Los checks se aplican al guardar. Ajustes avanzados: &fconfig.yml&7. Consulta &fDOCUMENTATION.md&7."
+  text-7: "&7Los checks se aplican al guardar. Ajustes avanzados: &fconfig.yml&7. Consulta &fdocs/CONFIGURATION.es.md&7."
   text-8: "&f&lCavesLite &8- &fOpciones"
   text-9: "&fSonidos ambientales"
   text-10: "&fPasos fantasma"
@@ -141,7 +144,7 @@ cavescommand:
   text-6: "&cUsa /"
   text-7: "&7Uso: /"
   text-8: "&cUsa /"
-  text-9: "&cNo se pudo invocar a Herobrine. Revisa el tipo o no hay una posición segura cargada."
+  text-9: "&7No se pudo invocar a Herobrine: revisa el tipo, el espacio seguro y el límite de encuentros activos del jugador."
   text-10: "&aHerobrine invocado cerca de &e"
 mobachievements:
   text-1: "&6¡Logro desbloqueado!"
@@ -150,8 +153,6 @@ dialogs:
   main:
     title: "&f&lCavesLite"
     description: "&7Criaturas, encuentros y herramientas de administracion"
-    active-prefix: "&f"
-    inactive-prefix: "&7&m"
     herobrine-label: "&fHerobrine"
   mob:
     title-prefix: "&f&l"
@@ -172,7 +173,7 @@ dialogs:
       maxactive: "&7Maximo activo global (0 = sin limite)"
   options:
     title: "&f&lCavesLite &8- &fOpciones"
-    description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / DOCUMENTATION.md"
+    description: "&7Activa o desactiva sistemas globales. Ajustes avanzados: config.yml / docs/CONFIGURATION.es.md"
     saved: "&fOpciones globales actualizadas."
     labels:
       ambient: "&fSonidos ambientales"
@@ -249,3 +250,20 @@ achievement:
   kills-suffix: " muertes)"
 debug:
   loaded: "cargados"
+
+giant-ui:
+  movement: "&fPersecución"
+  basic: "&fAtaque básico"
+  stomp: "&fPisotón"
+  quake: "&fTerremoto"
+  minions: "&fRefuerzos zombie"
+  loot: "&fBotín personalizable"
+  speed: "&fVelocidad de movimiento"
+  basic-damage: "&fDaño básico"
+  stomp-damage: "&fDaño del pisotón"
+  quake-damage: "&fDaño del terremoto"
+  stomp-radius: "&fRadio del pisotón"
+  quake-radius: "&fRadio del terremoto"
+  stomp-cooldown: "&fCooldown del pisotón (ticks)"
+  quake-cooldown: "&fCooldown del terremoto (ticks)"
+  minion-cap: "&fMáximo de refuerzos activos"

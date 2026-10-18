@@ -90,7 +90,7 @@ public class CaveGolem extends MobBase implements Listener {
     /** Small chance that breaking one of the "variants" ores releases a golem. */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
-        if (spawnFromBlockChance <= 0) return;
+        if (spawnFromBlockChance <= 0 || !manager.canReleaseFromBlock(this)) return;
         Block block = event.getBlock();
         // Nether encounters must use the natural replacement engine; End is excluded.
         if (block.getWorld().getEnvironment() != org.bukkit.World.Environment.NORMAL) return;
@@ -102,6 +102,7 @@ public class CaveGolem extends MobBase implements Listener {
             event.setExpToDrop(0);
             Location loc = block.getLocation().add(0.5, 0, 0.5);
             manager.spawn(this, loc).getEquipment().setHelmet(new ItemStack(ore));
+            manager.recordBlockRelease(this);
         }
     }
 

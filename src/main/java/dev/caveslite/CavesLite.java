@@ -66,11 +66,14 @@ public final class CavesLite extends JavaPlugin implements Listener {
     private KillLeaderboard leaderboard;
     private HerobrineEncounter herobrine;
     private Mimic mimic;
+    private GiantZombie giant;
     private AdminDialogs adminDialogs;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        if (!new java.io.File(getDataFolder(), "presets/basic.yml").exists()) saveResource("presets/basic.yml", false);
+        if (!new java.io.File(getDataFolder(), "presets/performance.yml").exists()) saveResource("presets/performance.yml", false);
 
         lang = new Lang(this);
         lang.reload(getConfig().getString("language", "es"));
@@ -89,7 +92,8 @@ public final class CavesLite extends JavaPlugin implements Listener {
         mobs.register(new LavaCreeper());
         mobs.register(new DeadMiner());
         mobs.register(new SmokeDemon());
-        mobs.register(new GiantZombie());
+        giant = new GiantZombie(this);
+        mobs.register(giant);
         mobs.register(new ChickenJockeyAnomaly());
         mobs.register(new KillerBunny());
         mobs.register(new IllusionerAnomaly());
@@ -125,6 +129,7 @@ public final class CavesLite extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(herobrine, this);
         reloadAll();
 
+        getServer().getScheduler().runTaskTimer(this, giant::maintenance, 20L, 20L);
         getServer().getScheduler().runTaskTimer(this, mobs::tick, MOB_TICK, MOB_TICK);
         getServer().getScheduler().runTaskTimer(this, mimic::cleanupExpiredChests, 400L, 400L);
         getServer().getScheduler().runTaskTimer(this, ambient::tick, AMBIENT_TICK, AMBIENT_TICK);
