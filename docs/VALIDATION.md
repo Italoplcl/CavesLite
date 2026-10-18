@@ -1,4 +1,4 @@
-# Validation — 2.0.0-preview.1
+# Validation — 2.0.0
 
 Production Java source compiled with JDK 25.0.4 against installed Purpur API 26.3.build.2650-stable and optional Vault/PlaceholderAPI compile dependencies. No external server JARs are bundled.
 
@@ -10,4 +10,4 @@ Documentation links were checked; the repository's original canonical src files 
 
 The local environment has no Gradle executable, so the local JAR is assembled from the compiled classes/resources with expanded plugin version metadata. GitHub Actions independently runs gradle build (including the same verifiers) on the preview branch/PR when CI is available. Its actual status is shown on the pull request and is not implied by local compilation.
 
-No Minecraft client/gameplay session was run for this preview. Native Giant pathfinding, actual damage/protection interactions, physical wave effects and minion lifecycle must be reviewed in-game using TESTING.md. Herobrine head tracking and elevation pursuit had previously been confirmed by the user on 1.12.4; the new clock/attacks still need the regression check on the user's server. This is a preview, not a final 2.0 publication.
+No Minecraft client/gameplay session was run for this preview. Native Giant pathfinding, actual damage/protection interactions, physical wave effects and minion lifecycle must be reviewed in-game using TESTING.md. Herobrine head tracking and elevation pursuit had previously been confirmed by the user on 1.12.4; the new clock/attacks still need the regression check on the user's server. The user approved this implementation for 2.0. The remaining gameplay checks are documented above.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0-preview.1
+## 2.0.0
 
 This is a preview for review before the final 2.0 publication.
 

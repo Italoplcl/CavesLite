@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.caveslite"
-version = "2.0.0-preview.1"
+version = "2.0.0"
 
 repositories {
     mavenCentral()

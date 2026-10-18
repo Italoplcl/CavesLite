@@ -1,6 +1,6 @@
 # CavesLite 2.0 preview configuration
 
-This guide describes `2.0.0-preview.1`. The sparse starter preset replaces the previous all-disabled distribution policy. Use the [Spanish guide](CONFIGURATION.es.md) for the full Spanish reference.
+This guide describes `2.0.0`. The sparse starter preset replaces the previous all-disabled distribution policy. Use the [Spanish guide](CONFIGURATION.es.md) for the full Spanish reference.
 
 ## Installation and migration
 

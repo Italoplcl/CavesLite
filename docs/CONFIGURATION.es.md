@@ -1,6 +1,6 @@
 # Configuración de CavesLite 2.0 preview
 
-Esta guía describe `2.0.0-preview.1`. La configuración inicial es deliberadamente escasa y editable. Sustituye la política antigua de entregar todos los encuentros desactivados.
+Esta guía describe `2.0.0`. La configuración inicial es deliberadamente escasa y editable. Sustituye la política antigua de entregar todos los encuentros desactivados.
 
 ## Instalación y actualización
 
